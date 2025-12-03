@@ -1,0 +1,3586 @@
+﻿\documentclass[a4paper,14pt]{extarticle}
+
+
+% --- Язык и кодировка ---
+
+% --- Язык и кодировка ---
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[shorthands=off,russian]{babel}
+% microtype \colon отключаем expansion, чтобы не падать на bitmap-шрифтах
+\usepackage[protrusion=true,expansion=false]{microtype}
+
+% --- Поля/верстка ---
+\usepackage{geometry}
+\geometry{top=20mm,bottom=20mm,left=20mm,right=20mm}
+\usepackage{indentfirst}
+\usepackage{setspace} % \onehalfspacing при необходимости
+
+% --- Математика ---
+\usepackage{mathtools,amssymb,amsfonts,amsthm}
+\usepackage{mathrsfs}
+\usepackage{icomma}
+\usepackage{cancel}
+\numberwithin{equation}{section}
+
+% --- Графика и рисунки ---
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{arrows.meta,positioning,backgrounds,
+	decorations.pathreplacing,calc,shapes}
+\usepackage{pgffor}
+\usepackage{quiver}
+\usepackage{wrapfig}
+\usepackage[dvipsnames]{xcolor}
+
+% --- Таблицы ---
+\usepackage{array,tabularx,tabulary,booktabs}
+\usepackage{multirow,multicol,longtable}
+
+% --- Выделения/подсветка текста ---
+\usepackage{soul} % вместо устаревшего soulutf8
+
+% --- Подписи к рисункам и таблицам ---
+\usepackage[
+margin=10pt,
+font={small,stretch=0.9},
+labelfont=bf,labelsep=period,
+justification=centering
+]{caption}
+
+% --- Код с подсветкой (нужно -shell-escape) ---
+\usepackage{minted}
+
+% --- Теоремы и задачи ---
+\newcounter{problem}[section]
+\renewcommand{\theproblem}{\thesection.\arabic{problem}}
+\theoremstyle{plain}\newtheorem{theorem}{Теорема}[section]
+\newtheorem{lemma}[theorem]{Лемма}
+\newtheorem{proposition}[theorem]{Предложение}
+\newtheorem{corollary}[theorem]{Следствие}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Определение}
+\newtheorem{example}[theorem]{Пример}
+\theoremstyle{remark}\newtheorem*{remark}{Замечание}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+% Задачи в рамке
+\usepackage[most]{tcolorbox}
+\newtcolorbox{problem}[1][]{%
+	enhanced, breakable,
+	colback=cyan!2, colframe=white, sharp corners, boxrule=0.2pt,
+	title={\bfseries Задача \theproblem.}, coltitle=black, fonttitle=\bfseries,
+	attach boxed title to top left={xshift=2mm,yshift=-1mm},
+	boxed title style={colframe=white, colback=cyan!2, top=1pt, bottom=1pt, left=2pt, right=2pt},
+	borderline west={2pt}{0pt}{red!75!black},
+	before skip=10pt, after skip=10pt,
+	before upper={\refstepcounter{problem}\addcontentsline{toc}{subsection}{Задача \theproblem}},
+	#1
+}
+\newenvironment{solution}{\par\noindent\textit{Решение.}\ }{\hfill$\blacksquare$\par\vspace{1em}}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% --- Заголовки и нумерация разделов ---
+\usepackage{titlesec}
+\setcounter{secnumdepth}{1} % нумеруем только секции (subsection без номера)
+\setcounter{tocdepth}{2}
+
+\titleformat{\section}[block]
+  {\Large\bfseries\centering}
+  {}
+  {0pt}{}
+\titlespacing*{\section}
+  {0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
+% --- Колонтитулы: слева --- текущий subsection с переносами, справа --- страница ---
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\setlength{\headheight}{20pt} % запас под 2 строки
+% что писать в \leftmark/\rightmark
+\renewcommand{\sectionmark}[1]{\markboth{Лекция~\thesection}{}}
+\renewcommand{\subsectionmark}[1]{\markright{#1}}
+% заголовок страницы (обрезаем/переносим по ширине колонтитула)
+\fancyhead[L]{\footnotesize\parbox[t]{0.92\headwidth}{\nouppercase{\leftmark{} --- \rightmark}}}
+\fancyhead[R]{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{1pt}
+
+% --- Указатель терминов ---
+\usepackage{imakeidx}
+\makeindex[name=terms,title={Указатель терминов},columns=2,intoc]
+\usepackage{xparse}
+\newcommand{\defindex}[1]{\index[terms]{#1|textbf}}
+\NewDocumentCommand{\term}{ o o m }{%
+	\textit{#3}%
+	\index[terms]{%
+		\IfNoValueTF{#2}{%
+			\IfNoValueTF{#1}{#3}{#1}%
+		}{%
+			#2@\IfNoValueTF{#1}{#3}{#1}%
+		}%
+	}%
+}
+\NewDocumentCommand{\defterm}{ o o m }{%
+	\textit{#3}%
+	\index[terms]{%
+		\IfNoValueTF{#2}{%
+			\IfNoValueTF{#1}{#3|textbf}{#1|textbf}%
+		}{%
+			#2@\IfNoValueTF{#1}{#3}{#1}|textbf%
+		}%
+	}%
+}
+
+% --- Список обозначений ---
+\usepackage[intoc,russian]{nomencl}
+\makenomenclature
+
+% --- Гиперссылки (последним, без дублирующих опций) ---
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	citecolor=blue,
+	urlcolor=green
+}
+
+
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+
+    {\LARGE \bfseries Комплексная геометрия\par}
+    \vspace{0.5cm}
+    {\Large  Никита Клемятин\par}
+
+
+ \begin{flushright}
+	\vfill {
+	{\small Верстка: Косяк Сергей} \\}
+    \end{flushright}
+    \vfill
+    
+    \vspace{1cm}
+    {\large\itshape НМУ, 2025\par}
+\end{titlepage}
+\newpage
+
+\pagestyle{plain}   
+\tableofcontents                      % Вывод оглавления
+\printnomenclature[2cm] 
+\pagestyle{fancy}   
+\newpage
+
+
+Перед вами конспект лекций, прочитанный в НМУ в 2025 году. Цель курса – рассказать ряд базовых результатов и техник в комплексной геометрии, дойдя до тех, что не содержатся в книжках Гриффитса-Харриса\cite{GriffithsHarris1982T1} и/или Хойхбрехтса\cite{Huybrechts2005}. Среди них $L^2$-оценка Хёрмандера (и теорема Кодаиры как следствие из нее), а также теорема Калаби-Яу (и геометрические следствия из нее). Также хотелось бы обсудить саму кэлерову геометрию, т.е. как кривизна влияет на свойства многообразия, как устроены многообразия постоянной голоморфной секционной кривизны,
+etc.
+
+\begin{enumerate}
+	
+	\item (Почти) комплексные многообразия. Голоморфные и плюрисубгармонические функции, а также сопутствующая линейная алгебра. Примеры.
+	
+	\item Подмногообразия и дивизоры.
+	
+	\item Голоморфные расслоения и когерентные пучки. Когомологии.
+	
+	\item Эрмитовы метрики и связность Черна. Кривизна. Подрасслоения, вторая фундаментальная форма и уравнение Гаусса.
+	
+	\item Кэлеровы метрики, связность Леви–Чивита, секционные кривизны и кривизна Риччи. Кэлеровы тождества. Теорема Ходжа и достаточно детальный набросок доказательства.
+	
+	\begin{remark}
+		Обычно теорему Ходжа либо вовсе не доказывают, либо пересказывают всё доказательство (например, по книге Уорнера). Здесь выбран другой путь: не доказываются самые трудные аналитические факты (типа леммы Реллиха или неравенства
+		$\norm{u}_{s+2}\leq C_s\bigl(\norm{\Delta u}_s+\norm{u}_s\bigr)$),
+		но показывается, как они работают и зачем нужны. Так слушатели поймут, как используется теория УрЧП в доказательстве, при этом не тратя много времени.
+	\end{remark}
+	
+	\item Возвращение к кривизнам: положительная/отрицательная кривизна. Лемма Шварца и формулы Кодаиры–Бохнера. Следствия из них.
+	
+	\item $L^2$-оценка Хёрмандера. Мультипликаторные пучки идеалов, теорема Наделя. Теорема Кодаиры как следствие из них.
+	
+	\item (опционально) Доказательство теоремы Ньюлендера–Ниренберга об интегрируемости почти комплексных структур при помощи $L^2$-оценки Хёрмандера.
+	
+	\begin{remark}
+		Доказательство $L^2$-оценки использует лишь факт, что тензор Нийенхюса равен нулю, то есть имеет место разложение
+		 $d=\partial+\bar\partial$
+		дифференциала де~Рама на $k$-формах. Этого достаточно, чтобы легко получить существование голоморфных координат в окрестности каждой точки.
+	\end{remark}
+	
+	\item Уравнение Монжа–Ампера и теорема Калаби–Яу. Существование метрик Кэлера–Эйнштейна на многообразиях общего типа и на многообразиях с нулевым классом Черна.
+	
+	\item Если останется время: теорема Демайи–Пауна о характеристиках кэлерова конуса через интегралы по подмногообразиям (существенным образом используется теорема Калаби–Яу).
+\end{enumerate}
+
+\newpage
+\section{Лекция 1}
+\subsection{Комплексификация и овеществление векторных пространств}
+Для начала вспомним некоторые основы линейной алгебры.
+\begin{proposition}
+	Пусть $V$ --- векторное пространство над $\mathbb{C}$ размерности $\dim_\mathbb{C}V=n$ и пусть $\mathcal{A} \colon V\to V$ --- $\mathbb{C}$-линейное отображение. Тогда $\mathcal A$ также можно рассматривать как вещественное линейное отображение и $\dim V_\mathbb{R} = 2n$
+\end{proposition}
+\begin{proof}
+	Рассмотрим $V_\mathbb{R}$ как то же самое векторное пространство $V$, но только теперь над $\mathbb{R}$. И соответственно получим линейное отображение $\mathcal{A}_\mathbb{R} \colon V_\mathbb{R} \to V_\mathbb{R}$.
+	
+ В обратную сторону, рассмотрим на $V_\mathbb{R}$ следующее линейное отображение:
+	\begin{align}
+		&J \colon V_\mathbb{R} \to V_\mathbb{R}, \quad J^2= -\operatorname{Id}, & J \colon v \mapsto  iv, \quad v\in V.
+	\end{align}
+	 пусть $(W,J)$ --- вещественное векторное пространство и $J \colon W\to W$, т.ч. $J^2 = -\operatorname{Id}$.
+	Размерность $W$ действительно чётная: пусть $m =\dim_\mathbb{R}$, тогда т.к. 
+	\[\det J^2 = \det(-\operatorname{Id} = (-1)^m = (\det J)^2 \geq 0, \quad \Longrightarrow \quad m =2n, \quad n\in \mathbb N.\]
+	Поэтому чётномерное пространство $(W,J)$ над $\mathbb{R}$ можно наделить структурой векторного пространства над $\mathbb{C}$. Пусть $a+bi \in \mathbb{C}$, $w\in W$ и $(a+bi)\cdot w = aw +bJw$. Нетрудно проверить, что операторы $\mathcal{A} \colon W \to W$ коммутируют с $J$ (т.е. $\mathcal{A}J = J\mathcal{A}$) и являются в точности комплексными эндоморфизмами. Если $\det \mathcal A \neq 0$, то $\mathcal{A} \in \operatorname{GL(n,\mathbb{C})}$.
+\end{proof}
+Рассмотрим ещё некоторые свойства векторных пространств. Пусть $W$~--- векторное пространство над~$\mathbb{R}$, тогда
+\[
+W_\mathbb{C} \simeq  W \oplus_{\mathbb{R}} \mathbb{C} = V,
+\]
+где $V$~--- теперь рассматривается как комплексное векторное пространство, а $W_\mathbb{C}$ называется \term[комплексификация векторного пространства]{комплексификацией векторного пространства}.
+\begin{align*}
+	&W \otimes_{\mathbb{R}} \mathbb{C}   \simeq W \oplus W,
+	&
+	\dim_{\mathbb{R}} W = \dim_{\mathbb{C}} V.
+\end{align*}
+
+Заметим, что  $W \otimes_{\mathbb{R}} \mathbb{C} \simeq W \oplus W$ и оператор $J$ действует на покомпонентно как 
+\[
+J(w_1, w_2) = (-w_2, w_1).
+\]
+эта операция и называется комплексификацией вещественного пространства.
+
+Но как связаны операции комплексификации и овеществления? Если вещественное пространство сначала комплексифицировать, а затем овеществить, то получим: 
+\[
+\bigl(V_{\mathbb{R}}\bigr)_{\mathbb{C}} \cong V \oplus \overline{V},
+\]
+а провести эти операции в обратном порядке для исходно комплексного пространства: 
+\[
+\bigl(V_{\mathbb{C}}\bigr)_{\mathbb{R}} \cong V \oplus \overline{V},
+\]
+полученное $\overline V$ --- это векторное пространство над $\mathbb{C}$, однако $\forall\, a+ib\in \mathbb{C}$, $v\in \overline V$ выполняется $(a+ib)\cdot v = (a-ib)v$ и 
+\[
+(V_{\mathbb{R}})_{\mathbb{C}} \cong V_{\mathbb{R}} \oplus V_{\mathbb{R}}
+\]
+для которого
+\[
+J(v_1,v_2) = (-v_2, v_1), \qquad v_j \in V,\;j = 1,2.
+\]
+а $J^2 = -\mathrm{Id}$. Тогда можно определить следующие собственные векторыне пространства отображения $J$, как
+\[
+V^{1,0} = \{ (v_1,v_2) \in (V_{\mathbb{R}})_{\mathbb{C}}
+\;\mid\; J(v_1,v_2) = i (v_1,v_2) \} \simeq V,
+\]
+\[
+V^{0,1} = \{ (v_1,v_2) \in (V_{\mathbb{R}})_{\mathbb{C}}
+\;\mid\; J(v_1,v_2) = -i (v_1,v_2) \} \simeq \overline{V}.
+\]
+Очевидно, что всё то же самое можно написать и для сопряжённых векторных пространств $\bigl(V^*_\mathbb{R}\bigr)_\mathbb{C}$. 
+
+\subsection{\texorpdfstring{Пространство $k$-форм}{Пространство k-форм}}
+\begin{definition}
+	Пусть $\Lambda^k \bigl( (V_{\mathbb{R}})_{\mathbb{C}} \bigr)$ обозначает пространство
+	$k$-форм на $(V_{\mathbb{R}})_{\mathbb{C}}$. Тогда имеет место следующее разложение
+	\[
+	\Lambda^k \bigl( (V_{\mathbb{R}})_{\mathbb{C}} \bigr)
+	= \Lambda^k ( V^* \oplus V^* )
+	= \bigoplus_{p+q = k} \Lambda^p V^* \otimes \Lambda^q V^*.
+	\]
+	Элементы пространства $\Lambda^{p,q} \colon = \Lambda^p V^* \otimes \Lambda^q V^*$
+	называются \term[формы типа $(p,q)$]{формами типа $(p,q)$}.
+\end{definition}
+\begin{proposition}
+	Форма типа $(n,n)$
+	\[
+	\tau \colon = i^n f_1 \wedge \overline{f}_1 \wedge \dots \wedge f_n \wedge \overline{f}_n
+	\]
+	задаёт ориентацию на $V_\mathbb{R}$.
+\end{proposition}
+
+\begin{proof}
+	Рассмотрим линейный оператор $\mathcal A \colon V \to V$.  
+	Зафиксируем базис $e_1, \dots, e_n, i e_1, \dots, i e_n$ в $V_\mathbb{R}$.
+	
+	Тогда оператору $\mathcal A$ сопоставляется матрица $\mathcal A_\mathbb{R}$, которая выражается через комплексную матрицу как
+	\[
+	\mathcal A = B + iC, \qquad B,C \in \mathrm{Mat}_{n}(\mathbb{R}).
+	\]
+	
+	В вещественном базисе $V_\mathbb{R}$ матрица $\mathcal A$ имеет вид
+	\[
+	\mathcal A_\mathbb{R} =
+	\begin{pmatrix}
+		B & -C \\
+		C & B
+	\end{pmatrix}.
+	\]
+	Отсюда
+	\[
+	\det \mathcal A_\mathbb{R} = \lvert \det \mathcal A \rvert^2 \geq 0.
+	\]
+\end{proof}
+\subsection{Положительные и сильно положительные формы}
+
+\begin{definition}
+	Пусть $\eta \in \Lambda^{p,q}(V^*)$.
+	\begin{enumerate}
+		\item Форма $\eta$ называется \term[положительная форма]{положительной}, если для любых $f_1,\dots,f_q$ при $q=n-p$ форма
+		\[
+		\eta \wedge i f_1 \wedge \overline{f}_1 \wedge \dots \wedge i f_q \wedge \overline{f}_q
+		\]
+		положительна.
+		
+		\item Форма $\eta$ называется \term[сильно положительная форма]{сильно положительной}, если
+		\[
+		\eta = \sum_s \gamma_s  i f_{1,s} \wedge \overline{f}_{1,s} \wedge \dots \wedge i f_{p,s} \wedge \overline{f}_{p,s}, 
+		\qquad \gamma_s > 0.
+		\]
+	\end{enumerate}
+\end{definition}
+
+\begin{example}
+	Для формы типа $(1,1)$:
+	\[
+	\eta \text{ положительна } \;\;\Longleftrightarrow\;\;
+	\eta = \sum_{j,\bar{k}} h_{j\bar{k}} f_j \wedge \overline{f}_k,
+	\]
+	где $h_{j\bar{k}} = i h_{jk}$ и $h=(h_{j\bar{k}})$ --- эрмитова матрица.
+\end{example}
+
+\begin{proposition}
+	$(1,1)$-форма положительна тогда и только тогда, когда она положительна на ограничении к каждому одномерному подпространству.
+\end{proposition}
+\begin{proof}
+	Рассмотрим $1$-ое подпространство $L = \langle \xi \rangle \subset V$ и $\eta|_L \geq 0$.
+	Продолжим $\xi$ до базиса, тогда
+	\[
+	\eta \wedge i f_1 \wedge \overline{f}_1 \wedge \dots \wedge i f_n \wedge \overline{f}_n > 0.
+	\]
+	В обратную сторону ограничение $\eta|_L$ имеет вид
+	\[
+	\eta|_L = \eta_{1\bar{1}}  f_1 \wedge \overline{f}_1,
+	\]
+	где $\eta_{1\bar{1}} = \eta(\xi,\overline{\xi})$.
+\end{proof}
+
+\begin{corollary}
+	$(1,1)$-форма имеет вид
+	\[
+	\eta = i \sum_{j,k=1}^n h_{j\bar{k}} f_j \wedge \overline{f}_k,
+	\]
+	где $H = (h_{j\bar{k}})$ --- положительно определённая эрмитова матрица.  
+	То есть
+	\[
+	\forall \xi =  \xi^j e_j \in V,
+	\quad  h_{j\bar{k}}  \xi^j \overline{\xi^k} > 0.
+	\]
+\end{corollary}
+\begin{proposition}
+	Если $(V,h)$ --- положительное эрмитово пространство, то $h$ определяет
+	евклидову метрику $g$ и симплектическую структуру $\omega$ на $V_\mathbb{R}$:
+	\[
+	h(\xi_1,\xi_2) = g(\xi_1,\xi_2) + i  \omega(\xi_1,\xi_2).
+	\]
+\end{proposition}
+
+\begin{proof}
+	Для $\xi_1,\xi_2 \in V$ имеем
+	\[
+	h(\xi_1,\xi_2) = g(\xi_1,\xi_2) + i\omega(\xi_1,\xi_2).
+	\]
+	Заметим, что
+	\[
+	h(\xi_2,\xi_1) = \overline{h(\xi_1,\xi_2)}
+	= g(\xi_2,\xi_1) - i\omega(\xi_2,\xi_1).
+	\]
+	Кроме того,
+	\[
+	h(i\xi_1, i\xi_2) = h(\xi_1,\xi_2),
+	\]
+	откуда следует
+	\[
+	g(J\xi_1, J\xi_2) = g(\xi_1,\xi_2), \qquad
+	\omega(J\xi_1,J\xi_2) = \omega(\xi_1,\xi_2).
+	\]
+	Поскольку $h(\xi,\xi) = g(\xi,\xi) > 0$, то форма $g$ является положительно определённой.
+	
+	Далее,
+	\[
+	h(i\xi_1,\xi_2) = g(J\xi_1,\xi_2) + i\omega(J\xi_1,\xi_2),
+	\]
+	но также
+	\[
+	h(i\xi_1,\xi_2) = i h(\xi_1,\xi_2) = i g(\xi_1,\xi_2) - \omega(\xi_1,\xi_2).
+	\]
+	Приравнивая действительные и мнимые части, получаем
+	\[
+	g(J\xi_1,\xi_2) = -\omega(\xi_1,\xi_2), \qquad
+	-\omega(\xi_1,\xi_2) = -g(\xi_1,J\xi_2).
+	\]
+	То есть $g$ и $\omega$ согласованы с комплексной структурой $J$.
+\end{proof}
+
+\newpage
+\section{Лекция 2}
+\subsection{Голоморфные функции многих переменных}
+\begin{definition}
+	Пусть $\Omega$ --- открытое и связное множество в $\mathbb{C}^n$. Функция $f \colon \Omega \to \mathbb{C}$ называается \term[голоморфная функция нескольких переменных]{голоморфной функцией нескольких переменных}, если она непрерывна и голоморфна по каждой переменной $(z^1,\dots z^n)$. 
+\end{definition}
+\begin{proposition}
+	Пусть $z_0\in\Omega$ и задан \term[полидиск]{полидиск}  $P(z_0,R) =\{z\in\mathbb{C}^n\big| |z^j-z_0^j|<  R_j, j\in \overline{1,n}\}$ и его граница $T(z_0,R) =\{z\in\mathbb{C}^n\big| |z^j-z_0^j|=R_j, j\in \overline{1,n}$, где $R = \{R_1,\dots,R_n|R_i>0\}$, тогда если $f$ голоморфна в $\Omega$ ($f\in \mathcal O(\Omega)$), то верно 
+	\[f(z_0)=\frac{1}{(2\pi i)^n} \int\limits_{T(z_0,R)}\frac{f(\xi)d\xi^1\dots d\xi^n}{(z^1-\xi^1) \dots (z^n-\xi^n)}.\]
+\end{proposition}
+\begin{proof}
+	Аналогично доказательству для одномерного случая.
+\end{proof}
+\begin{corollary}
+	\begin{itemize}
+		\item[1.] Голоморфная функция аналитична
+		\item[2.] Пусть $\nu = (\nu_1\dots\nu_n)$ --- мультииндекс и задана производная
+		\[f^{(\nu)} = \frac{\partial^{|\nu|}}{\partial z^{\nu_1} \dots \partial z^{\nu_k}}f, \quad \Longrightarrow \quad f^{(\nu)}(z_0) = \frac{\nu!}{(2\pi n)^n}\int\limits_{T(z_0,R)}\frac{f(\xi)d^n\xi}{(z-\xi)^{\nu+1}}.\]
+		\item[3.] Верна следующая оценка
+		\[
+		\left| f^{\nu}(z_0) \right|
+		\leq \frac{\nu!  \sup_T |f|}
+		{R_1^{\nu_1} \cdots R_n^{\nu_n}}
+		\]
+		\item[4.] Если $f$ голоморфна на $\mathbb{C}^n$ и ограничена,  
+		то $f \equiv \text{const}$.
+	\end{itemize}
+\end{corollary}
+\begin{definition}
+	Пусть $\Omega\subset \mathbb{C}^n$, функция $F \colon \Omega \to \mathbb{C}^m$ назывется \term[голоморфное отображение]{голоморфным отображением}, если оно задано голоморфными функциями.
+\end{definition}
+Т.е. если $(w^i\dots w^n)$ --- координыты на $\mathbb{C}^m$, то функции $w^j = F^j(z^1\dots z^n),$ $j =1\dots m$ являются голоморфными.
+
+\begin{proposition}[Цепное свойство]
+	Пусть функция $f \colon \Omega \to \mathbb{C}$ голоморфна, $\varphi = (\varphi^1, \dots, \varphi^n) \colon \Omega' \subset \mathbb{C}^p \to \Omega$,  где $\varphi^j \in \mathcal{O}(\Omega')$ для всех $j=1,\dots,n$,  и $(\varphi^1(w), \dots, \varphi^n(w)) \in \Omega$ для всех $w \in \Omega'$.  
+	
+	Тогда  
+	\[
+	f\big(\varphi^1(w), \dots, \varphi^n(w)\big) \in \mathcal{O}(\Omega').
+	\]
+\end{proposition}
+Также можно дать и альтернативное определение голоморфного отображения:
+\begin{definition}
+	Пусть $\Omega\subset \mathbb{C}^n$, функция $F \colon \Omega \to \mathbb{C}^m$ назывется \term[голоморфное отображение]{голоморфным отображением}, если $\forall g \in \mathcal O(C^m)$ $F^*g$ --- голоморфная функция.
+\end{definition}
+После чего мы наконец готовы дать центральное определение нашего курса.
+
+\begin{definition}
+	 Хаусдорфово топологическое пространство $X$ со счетной базой топологии называется \term[комплексное многообразие]{комплексным многообразием},  
+	если существует атлас карт $\{(U_\alpha, \varphi_\alpha)\}$, такой что  
+	\[
+	X = \bigcup_\alpha U_\alpha, \quad \varphi_\alpha(U_\alpha) \subset \mathbb{C}^n,
+	\]  
+	и для любых $\alpha, \beta$ отображение переклейки  
+	\[
+	\varphi_{\alpha\beta} = \varphi_\alpha \circ \varphi_\beta^{-1} \colon \varphi_\beta(U_\alpha \cap U_\beta) \to \varphi_\alpha(U_\alpha \cap U_\beta)
+	\]  
+	и его обратное --- $\varphi_{\beta\alpha}$ --- голоморфны.
+\end{definition}
+
+Пусть $X$ --- комплексное многообразие комплексной размерности $n$.
+Как следует из первой лекции, комплексификация овеществлённого касательного пространства в точке $x\in X$ раскладывается в прямую сумму подпространств двух типов $(1,0)$ и $(0,1)$:
+\[
+(T_x)_{\mathbb{R}}\otimes\mathbb{C} \cong T_x \oplus \overline{T_x},
+\qquad
+\big((T_x)_{\mathbb{R}}^*\big)\otimes\mathbb{C} \cong T_x^* \oplus \overline{T_x^*}.
+\]
+В локальных голоморфных координатах $z^j=x^j+iy^j$ базис $1$-форм имеет вид
+\[
+dz^j=dx^j+idy^j \quad\text{--- $(1,0)$-форма},\qquad
+d\bar z^{j}=dx^j-idy^j \quad\text{--- $(0,1)$-форма}.
+\]
+Соответственно, внешние степени кокасательного пространства также раскладываются по типам:
+\[
+\Lambda^k \big(\big((T_x^*)_{\mathbb{R}}\otimes\mathbb{C}\big)\big)
+=\Lambda^k \big(T_x^*\oplus\overline{T_x^*}\big) 
+\cong
+\bigoplus_{p+q=k}\Lambda^pT_x^*\otimes\Lambda^q\overline{T_x^*} \cong \bigoplus_{p+q=k}\Lambda^{p,q}T_x^*,
+\]
+и элементы суммы называют дифференциальными формами типа $(p,q)$.
+
+\subsection{Дифференциал де Рама} \label{subsec:derham}
+Глобально для комплексного многообразия $X$ внешнее дифференцирование
+\[
+d \colon \Gamma \big(\Lambda^k(T_X^*)_{\mathbb{R}}\otimes\mathbb{C}\big)\longrightarrow \Gamma \big(\Lambda^{k+1}(T_X^*)_{\mathbb{R}}\otimes\mathbb{C}\big)
+\]
+согласовано с разложением по типам и раскладывается как $d=\partial+\bar\partial$, т.е.
+\begin{align*}
+&\partial \colon \Gamma(\Lambda^{p,q}T_X^*)\to \Gamma(\Lambda^{p+1,q}T_X^*),&
+\bar\partial \colon \Gamma(\Lambda^{p,q}T_X^*)\to \Gamma(\Lambda^{p,q+1}T_X^*).
+\end{align*}
+
+\begin{corollary}\label{cor:derham}
+	Функция $f \colon X\to\mathbb{C}$ является голоморфной тогда и только тогда когда $\bar{\partial}f=0$.
+\end{corollary}
+\begin{remark}
+	Т.к. $d^2 =0$, то $\partial^2+\bar{\partial}^2+\partial\bar{\partial}+\bar{\partial}\partial = 0$.
+	Заметим, что если 
+	\[
+	\Psi_{p,q} \in \Gamma \big(\Lambda^{p,q} T_x^*\big),
+	\] 
+	то
+	\[
+	\partial^2 \Psi_{p,q} \in \Gamma \big(\Lambda^{p+2,q} T_x^*\big), 
+	\qquad 
+	\bar\partial^2 \Psi_{p,q} \in \Gamma \big(\Lambda^{p,q+2} T_x^*\big),
+	\]
+	а также
+	\[
+	(\partial\bar\partial + \bar\partial\partial) \Psi_{p,q} 
+	\in \Gamma \big(\Lambda^{p+1,q+1} T_x^*\big).
+	\]
+	Следовательно,
+	\[
+	0 = d^2 = \partial^2 = \bar\partial^2 = \partial\bar\partial + \bar\partial\partial.
+	\]
+\end{remark}
+Понятное дело, что можно определить и когомологии Дольбо комплексного многообразия $X$ как
+\[
+H^{p,q}(X) = 
+\frac{\ker\big(\bar\partial \big|_{\Gamma(\Lambda^{p,q}T_X^*)}\big)}
+{\operatorname{Im}\big(\bar\partial \big|_{\Gamma(\Lambda^{p,q-1}T_X^*)}\big)}.
+\]
+\begin{proposition}
+	Пусть $\Psi_{p,q}\in \Gamma(\Lambda^{p,q})$ удовлетворяет условию
+	\[
+	\bar\partial \Psi_{p,q}=0.
+	\]
+	Тогда её коэффициенты образуют голоморфную функцию. 
+\end{proposition}
+
+\begin{remark}
+	Из условия $\bar\partial \Psi=0$ \textbf{не следует}, что $\partial \Psi=0$.
+\end{remark}
+Пусть $\pi \colon E \to X$ --- комплексное векторное расслоение над комплексным многообразием $X$.  
+\begin{definition}
+	Говорят, что $E$ является \term[голоморфное векторное расслоение]{голоморфным векторным расслоением}, если существует покрытие $\{U_\alpha\}$ множества $X$, $U_\alpha \subset \mathbb{C}^n$, такое что функции перехода
+	\[
+	\gamma_{\alpha\beta} \colon E|_{U_\alpha\cap U_\beta} \longrightarrow E|_{U_\alpha\cap U_\beta}
+	\]
+	являются голоморфными.
+\end{definition}
+\textbf{ТУТ ЕЩЕ ОДНО УТВЕРЖДЕНИЕ}
+
+\newpage
+\section{Лекция 3}
+Рассмотрим действие оператора $\bar \partial$ на формах, а именно
+\[\bar\partial\alpha = \sum_{k=1}^n\frac{\partial_{\bar k}\alpha_{I\bar J}}{\partial \overline{z}^k}.\]
+Рассмотрим уравнение вида $\bar\partial u =f$. Очевидно, что необходимым условием для его решения является условие $\bar\partial f = 0$. в случае если взять $(0,1)$-форму $f$:
+\[
+u(z)=\frac{1}{2\pi i}\sum_{j=1}^n
+\int_{\mathbb{C}}\frac{f_j(z_1,\ldots,z_{j-1},\zeta,z_{j+1},\ldots,z_n)}{\zeta-z_j}
+d\zeta\wedge d\bar\zeta.
+\]
+
+
+\subsection{Потоки и обобщенные функции}
+Пусть $\mathcal D ^k(\Omega)$, $\Omega\subset \mathbb{R}$  --- пространство $k$~-форм с компактными носителями (со значениями в $\mathbb K$ или $\mathbb{C}$).
+
+Пусть $L\subset \Omega$ --- компакт, $\alpha \in \mathcal D^k(\Omega)$, определим
+\[P_{s,l}=\sup_{x\in L}\sup_{|\nu|,|J|\leq s} |\partial^\nu \alpha_J(x)|, \quad \text{где}\quad \alpha = \sum_{|J|=k}\alpha_Jdx^J, \quad \partial^\nu=\frac{\partial^{|\nu|}}{\partial x_1^{\nu_1}\cdots\partial x_n^{\nu_n}}\]
+Чтобы как-то это проиллюстрировать, рассмотрим несколькопримеров.
+\begin{definition}
+	Поток ${T}$ размерности $k$ (или степени $n-k$) --- это линейный функционал
+	на $\mathcal{D}^{n-k}(\Omega)$, непрерывный в обычной топологии.
+\end{definition}
+
+\begin{example}
+	\begin{enumerate}
+		\item Пусть $\beta$ --- гладкая $(n-k)$-форма на $\Omega$. Тогда
+		\[
+		{T}_\beta(\alpha)=\int_{\Omega}\beta\wedge\alpha.
+		\]
+		
+		\item Пусть $\Sigma\subset\Omega$ --- гладкое ориентированное многообразие размерности
+		$k$. Тогда
+		\[
+		{T}_\Sigma(\alpha)=\int_{\Sigma}\alpha.
+		\]
+	\end{enumerate}
+\end{example}
+
+Пусть
+\[
+\langle  T_\beta,\alpha\rangle \colon =  T_\beta(\alpha) := \int_{\Omega} \beta\wedge\alpha.
+\]
+
+Определим также следующие обозначения функционалов $ T_{\Sigma}$ по формуле
+\[
+T_{\Sigma} (\alpha)=\int_{\Sigma}\alpha = [\Sigma].
+\]
+$\Omega$ --- область в $\mathbb{R}^{n}$ или ориентируемое многообразие без края.
+
+Если $\alpha\in\mathcal{D}^{k-1}(\Omega)$, $\beta\in\Gamma(\Lambda^{n-k}\Omega)$, то
+\[
+0=\int_{\Omega} d(\beta\wedge\alpha)
+=\int_{\Omega} d\beta\wedge\alpha+(-1)^{n-k}\int_{\Omega}\beta\wedge d\alpha.
+\]
+
+Кроме того,
+\[
+\int_{\Omega}\beta\wedge d\alpha=\langle T_{\beta}, d\alpha\rangle.
+\]
+
+
+\begin{definition}
+	Определим оператор $d$ на потоках размерности $k$ по формуле
+	\[
+	\langle dT, \alpha\rangle = (-1)^{n-k+1}\langle T, d\alpha\rangle,
+	\qquad \alpha\in\mathcal{D}^{k-1}(\Omega).
+	\]
+\end{definition}
+
+\begin{proposition}
+	Пусть $\Sigma\subset\mathbb{R}^{n}$, $\dim \Sigma = k$, а $\gamma\in\mathcal{D}^{k-1}(\Omega)$, тогда 
+	\[
+	dT_{\Sigma}=(-1)^{n-k+1}T_{\partial\Sigma}.
+	\]
+\end{proposition}
+\begin{proof}
+	Доказательство следует из теоремы Стокса.
+	\[
+	T_{\Sigma}(d\gamma)=\int_{\Sigma} d\gamma
+	=\int_{\partial\Sigma}\gamma
+	= (-1)^{n-k+1}\langle dT_{\Sigma},\gamma\rangle.
+	\]
+\end{proof}
+
+Пусть $F \colon \Omega_{1}\to\Omega_{2}$ --- гладкое отображение между ориентируемыми $C^\infty$-многообразиями размерности $m_{1}$ и $m_{2}$.
+Тогда для каждого $k$ определён непрерывный оператор на гладких формах
+\[
+F^{*} \colon \Gamma^{k}(\Omega_{2})\longrightarrow\Gamma^{k}(\Omega_{1}),
+\qquad
+\operatorname{supp}(F^{*}u)\subset F^{-1}(\operatorname{supp}u).
+\]
+Вообще говоря, $F^{*}$ \emph{не} переводит $\mathcal{D}^{k}(\Omega_{2})$ в $\mathcal{D}^{k}(\Omega_{1})$ (если $F$ не собственное), лишь в $\Gamma^{k}(\Omega_{1})$.
+
+\begin{definition}[Носитель потока]
+	Пусть $\Omega$ --- ориентируемое $m$-мерное многообразие и $T\in\mathcal{D}'_{k}(\Omega)$ --- поток размерности $k$ (степени $m-k$).
+	Его \emph{носителем} $\operatorname{supp}T$ называется наименьшее замкнутое множество $A\subset\Omega$ такое, что
+	\[
+	\langle T,\alpha\rangle=0
+	\quad\text{для всех }\alpha\in\mathcal{D}^{m-k}(\Omega)\text{ с }\operatorname{supp}\alpha\subset\Omega\setminus A.
+	\]
+\end{definition}
+
+Пусть $F \colon \Omega_{1}\to\Omega_{2}$ --- гладкое отображение и $T\in\mathcal{D}'_{k}(\Omega_{1})$ такой, что ограничение
+$F\big|_{\operatorname{supp}T} \colon \operatorname{supp}T\to\Omega_{2}$ собственно (прообраз компакта компактен).
+Тогда существует единственный поток $F_{*}T\in\mathcal{D}'_{k}(\Omega_{2})$, определённый формулой
+\[
+\langle F_{*}T,\alpha\rangle=\langle T, F^{*}\alpha\rangle,
+\qquad
+\alpha\in\mathcal{D}^{m_{2}-k}(\Omega_{2}),
+\]
+где $m_{2}=\dim\Omega_{2}$.
+
+\begin{example}Пусть $\alpha$ --- $1$-форма на $\mathbb{R}$ с компактным носителем.
+	\[
+	\alpha=\alpha(x)dx.
+	\]
+	Зададим отображение
+	\[
+	F \colon \mathbb{R}^{2}\to\mathbb{R},\qquad (x,y)\mapsto x.
+	\]
+\end{example}
+
+
+\begin{proposition}
+	Пусть $T\in\mathcal{D}'_{k}(\Omega_{1})$ и ограничение $F\big|_{\operatorname{supp}T}$ собственное.
+	Тогда
+	\begin{enumerate}
+		\item $\operatorname{supp}(F_{*}T)\subset F(\operatorname{supp}T)$.
+		\item $F_{*}\!\bigl(T\wedge F^{*}\alpha\bigr)=(F_{*}T)\wedge\alpha$.
+		\item $d(F_{*}T)=F_{*}(dT)$.
+		\item Если $G \colon \Omega_{2}\to\Omega_{3}$ и $G\big|_{\operatorname{supp}(F_{*}T)}$ собственное, то
+		\[
+		G_{*}(F_{*}T)=(G\circ F)_{*}T.
+		\]
+	\end{enumerate}
+\end{proposition}
+
+
+Пусть теперь $F \colon \Omega_{1}\to\Omega_{2}$ --- субмерсия (т.е. $F$ сюръективно и $dF_{x} \colon T_{x}\Omega_{1}\to T_{F(x)}\Omega_{2}$ сюръективно для всех $x\in\Omega_{1}$).
+
+Если $\alpha\in\mathcal{D}^{k}(\Omega_{1})$ (форма с компактным носителем), $\dim\Omega_{i}=n_{i}$ и $k\geq n_{1}-n_{2}$, то можно определить $F_{*}\alpha$ (интегрирование по слоям).
+
+Обозначим $\mathcal{F}_{y}=\{x\in\Omega_{1}\mid F(x)=y\}$.
+Локально существуют координаты $x=(x^{1},\dots,x^{n_{1}})$, $y=(y^{1},\dots,y^{n_{2}})$ такие, что $F(x)=(y^{1},\dots,y^{n_{2}})$ и $x^{i}=y^{i}$ для $1\leq i\leq n_{2}$; положим $\hat{x}=(x^{n_{2}+1},\dots,x^{n_{1}})$ и пусть $\operatorname{supp} \alpha\subset \mathcal{F}_{y} \times\{|y|<1\}$.
+Тогда при таких координатах
+\[
+(F_{*}\alpha)(y)=\int\limits_{\hat x\in\widehat{\mathcal{F}}_{y}}\alpha(y,\hat{x}).
+\]
+В этом случае определяем оператор на токах
+\[
+F^{*} \colon \mathcal{D}'_{k}(\Omega_{2})\longrightarrow \mathcal{D}'_{k+n_{1}-n_{2}}(\Omega_{1}),
+\]
+по дуальности
+\[
+\langle F^{*}T,\alpha\rangle=\langle T,F_{*}\alpha\rangle,
+\qquad \forall\alpha\in\mathcal{D}^{n_{2}-k}(\Omega_{1}).
+\]
+
+\begin{example}
+	Пусть $\delta_{0}$ --- дельта-функция на $\mathbb{R}^{k}$, $\langle\delta_{0},\varphi\rangle=\varphi(0)$.
+	Пусть $F \colon \mathbb{R}^{k}\times\mathbb{R}^{k}\to\mathbb{R}^{k}$, $F(x,y)=x-y$.
+	Тогда
+	\[
+	F^{*}\delta_{0}=[\Delta],
+	\]
+	где $\Delta=\{(x,y)\in\mathbb{R}^{k}\times\mathbb{R}^{k}\mid x=y\}$ --- диагональ.
+\end{example}
+\subsection{Ядро Бохнера-Мартинелли}
+
+Вернемся теперь к нашей первоначальной задачи, а именно построить фундаментальное решение для оператора $\bar\partial$ в $\mathbb{C}^{n}$.
+
+Пусть мы живём в $\mathbb{C}^{n}$ с координатами $z=(z^{1},\dots,z^{n})$, $|z|^{2}=\sum_{j=1}^{n}z^{j}\bar z^{j}$.
+Определим $(n,n-1)$-форму (поток) Бохнера–Мартинелли
+\[
+K(z,\bar z)
+=
+\frac{(n-1)! (-1)^{\frac{n(n-1)}{2}}}{(2\pi i)^{n}}
+\sum_{j=1}^{n}
+(-1)^{j+1}
+\frac{\bar z^{j}}{|z|^{2n}}
+d\bar z^{1}\wedge\cdots\wedge\widehat{d\bar z^{j}}\wedge\cdots\wedge d\bar z^{n}
+\wedge dz^{1}\wedge\cdots\wedge dz^{n}.
+\]
+
+\begin{theorem}[Фундаментальное решение для $\bar\partial$]
+	Для $n\geq 2$ имеет место тождество потоков
+	\[
+	\bar\partial K(z,\bar z)=\delta_{0},
+	\]
+	где $\delta_{0}$ --- дельта-функционал.
+\end{theorem}
+
+\begin{proof}
+	Обозначим через
+	\[
+	dV
+	=
+	dx^{1}\wedge dy^{1}\wedge\cdots\wedge dx^{n}\wedge dy^{n}
+	=
+	\left(\frac{1}{2i}\right)^{n}
+	\bigwedge_{s=1}^{n}dz^{s}\wedge d\bar z^{s}
+	\]
+	меру Лебега в $\mathbb{R}^{2n}$.
+	
+	Вне начала координат дифференцирование действует покомпонентно, и из определения $K$ получаем
+	\[
+	\bar\partial K
+	=
+	\frac{(n-1)!}{(2\pi i)^{n}}
+	\sum_{j=1}^{n}
+	\frac{\partial}{\partial\bar z^{j}}
+	\!\left(\frac{\bar z^{j}}{|z|^{2n}}\right)
+	d\bar z^{1}\wedge\cdots\wedge d\bar z^{n}
+	\wedge dz^{1}\wedge\cdots\wedge dz^{n}.
+	\]
+	Используя тождество
+	\[
+	\frac{\partial}{\partial\bar z^{j}}
+	\!\left(\frac{\bar z^{j}}{|z|^{2n}}\right)
+	=
+	-\frac{1}{n-1}
+	\frac{\partial^{2}}{\partial z^{j}\partial\bar z^{j}}
+	\!\left(\frac{1}{|z|^{2n-2}}\right),
+	\]
+	а также равенство
+	\[
+	\sum_{j=1}^{n}
+	\frac{\partial^{2}}{\partial z^{j}\partial\bar z^{j}}
+	=
+	\frac{1}{4}\Delta_{\mathbb{R}^{2n}},
+	\]
+	получаем (в смысле обычных функций вне $0$)
+	\begin{equation}
+		\bar\partial K
+		=
+		-\frac{(n-1)!}{(2\pi i)^{n}}
+		\frac{1}{n-1}\cdot\frac{1}{4}
+		\Delta_{\mathbb{R}^{2n}}\!\left(\frac{1}{|z|^{2n-2}}\right)dV.
+		\label{partK}
+	\end{equation}
+	
+	Напомним фундаментальное решение для лапласиана в $\mathbb{R}^{m}$ ($m\geq3$):
+	\[
+	N(y)
+	=
+	-\frac{1}{(m-2)\sigma_{m-1}}
+	\frac{1}{|y|^{m-2}},
+	\qquad
+	\Delta_{\mathbb{R}^{m}}N=\delta_{0},
+	\]
+	где $\sigma_{m-1}=\dfrac{2\pi^{m/2}}{\Gamma(m/2)}$.
+	При $m=2n$ имеем
+	\[
+	\Delta_{\mathbb{R}^{2n}}\!\left(\frac{1}{|z|^{2n-2}}\right)
+	=
+	-(2n-2)\sigma_{2n-1}\delta_{0}.
+	\]
+	Подставляя это в \eqref{partK} и используя $\sigma_{2n-1}=\dfrac{2\pi^{n}}{(n-1)!}$, плучаем
+	\[
+	\bar\partial K
+	=
+	\frac{(n-1)!}{(2\pi i)^{n}}
+	\frac{2n-2}{4(n-1)}
+	\frac{2\pi^{n}}{(n-1)!}\delta_{0}
+	=
+	\delta_{0}.
+	\]
+	Здесь использовано тождество форм
+	$d\bar z^{1}\wedge\cdots\wedge d\bar z^{n}\wedge dz^{1}\wedge\cdots\wedge dz^{n}
+	=(2i)^{n} dV$, которое компенсирует соответствующие множтели.
+	
+\end{proof}
+
+
+\newpage
+\section{Лекция 4}
+\setcounter{section}{4}
+\setcounter{theorem}{0}
+Как мы выяснили на прошлой лекции
+\[k(z,\overline z) = \sum_{j=1}^n (-1)^{j+1}\frac{\overline{z}^j dz^1\wedge\dots\wedge dz^n\wedge d\overline{z}^1\wedge \dots \wedge \widehat{d\overline{z}^j}\wedge \dots \wedge dz^n}{|z|^{2n}},\]
+удовлетворяtn уравнению
+\begin{equation}
+	\overline{\partial}k(z,\overline z) =\delta_0.
+\end{equation}
+Рассмотрим отображение $\pi \colon \mathbb{C}\times \mathbb{C} \to \mathbb{C}$, заданное как $(z,\xi) = z-\xi$.
+При помощи этого мы можем определить \textit{форму Бохнера-Мартинелли}
+\begin{equation}
+	K_{BM}(z,\xi):=\pi^*k(z,\overline z)
+\end{equation}
+обладающую следующим свойством \begin{equation}\label{[Delta]}
+	\overline{\partial}k_{BM} = [\Delta],
+\end{equation} где множество $\Delta = \{(z,\xi)\in\mathbb{C}\times \mathbb{C}|z=\xi\}$ --- всем привычная диагональ.
+
+Заметим, что $K_{BM}$ можно представить в виде следующей суммы:
+\[K_{BM} = \sum_{p,q}K^{p,q}_{BM}(z,\xi),\]
+где $K^{p,q}_{BM}$ --- это компонента $K_{BM}$ бистепени $(p,q)$ по переменной $z$ (соответственно $(n-p,n-q+1)$ по переменной $\xi$). 
+
+\begin{theorem}[Формула Коппельмана]
+	Пусть $\Omega\subset\mathbb{C}^{n}$ --- ограниченная открытая область
+	с кусочно $C^{1}$-гладкой границей. Тогда для любой $(p,q)$-формы
+	$v$ класса $C^{1}$ на $\overline{\Omega}$ для всех $z\in\Omega$ выполняется следующая формула:
+	\begin{equation}\label{Koppelman formula}
+		v(z)
+		= \int_{\partial\Omega} K_{\mathrm{BM}}^{p,q}(z,\xi)\wedge v(\xi) 
+		+ \bar{\partial}_z\int_{\Omega} K_{\mathrm{BM}}^{p,q-1}(z,\xi)\wedge v(\xi)
+		+ \int_{\Omega} K_{\mathrm{BM}}^{p,q}(z,\xi)\wedge \bar{\partial}_z v(\xi).
+	\end{equation}
+\end{theorem}
+\begin{proof}
+	Рассмотрим интеграл
+	\[\int_{\partial \Omega}
+	K_{\mathrm{BM}}(z,\xi) \wedge v(\xi), \]
+	его можно рассматривать как форму, которая задает поток, т.е. взяв $w \in \mathcal{D}^{n-p,n-q}$, можем получить 
+	\[
+	\int_{\partial \Omega \times \Omega}
+	K_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge w(z).
+	\]  
+	Т.к. $w$ --- это форма с компактным носителем, то она зануляется на границе области $\partial\Omega$, а значит область интегрирования может быть расширена до $\partial (\Omega\times\Omega)$, тогда, применив теорему Стокса, получаем:
+	\begin{multline*}
+		\int_{\partial \Omega \times \Omega}
+		K_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge w(z) 
+		= \int_{\Omega \times \Omega}
+		\bar{\partial}_z \big(K_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge w(z)\big) \\
+		= \int_{\Omega \times \Omega}
+		\bar{\partial}_zK_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge w(z)
+		- K_{\mathrm{BM}}(z,\xi) \wedge \bar{\partial}_zv(\xi) \wedge w(z) \\
+		\quad- (-1)^{p+q} \int_{\Omega \times \Omega}
+		K_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge \bar{\partial}_zw(z).
+	\end{multline*}
+	в силу уравнения \eqref{[Delta]}, мы можем переписать первое слагаемое как
+	\[
+	\int_{\Omega \times \Omega} \bar{\partial}_z K_{\mathrm{BM}}(z,\xi) \wedge v(\xi) \wedge w(z)
+	= \int_{\Omega \times \Omega} [\Delta] \wedge v(\xi) \wedge w(z)
+	= \int_{\Omega} v(z) \wedge w(z).
+	\]
+	Второе же слагаемое, после применения разложения $K_{BM}$ в сумму, оставляет только коэффициент $K^{p,q}_{BM}$, а в третьем остается $K^{p,q-1}_{BM}$.
+	
+	Обозначая через $\langle , \rangle$ спаривание между потоками и пробными формами на $\Omega$, 
+	вышеуказанное равенство переписывается как
+	\begin{multline*}
+		\big\langle \int_{\partial\Omega} K_{\mathrm{BM}}(z,\xi)\wedge v(\xi), w(z) \big\rangle
+		= \big\langle v(z) - \int_{\Omega} K_{\mathrm{BM}}^{p,q}(z,\xi)\wedge \bar{\partial}_z v(\xi), w(z) \big\rangle \\
+		\qquad - (-1)^{p+q}\big\langle \int_{\Omega} K_{\mathrm{BM}}^{p,q-1}(z,\xi)\wedge v(\xi), \bar{\partial}_z w(z) \big\rangle,
+	\end{multline*}
+	что само по себе эквивалентно формуле Коппельмана при интегрировании $\bar{\partial}_z v$ по частям.
+\end{proof}
+\begin{remark}
+	Заметим, что формула \eqref{Koppelman formula} является многомерным обобщением формулы Коши
+\end{remark}
+\begin{corollary} \label{cor:supp}
+	Рассмотрим форму $v$ с компактным носителем в $\Omega$ и $\bar{\partial}_z v =0$, тогда по формуле \eqref{Koppelman formula} 
+	\[v(z) = \bar{\partial}_z\int_\Omega K_{BM}^{p,q-1}(z,\xi)\wedge v(\xi),\]
+	т.е. каждая форма с компактным носителем является точной.
+\end{corollary}
+
+\begin{theorem}
+	Пусть теперь $n \geqslant2$, $K \subset \Omega$, $\Omega/K$ --- связно, тогда $\forall f \in \mathcal{O}(\Omega/K)$ существует $F|_{\Omega/K} = f$.
+\end{theorem}
+\begin{proof}
+	Пусть $\varphi$ --- гладкая функция с компактным носителем, такая что $\varphi =1$ в окрестности $K$. Введем
+	\[
+	\tilde{f} =
+	\begin{cases}
+		(1 - \varphi) f & \text{вне } K, \\[6pt]
+		0 & \text{на } K.
+	\end{cases}
+	\]
+	тогда пусть $v = \bar{\partial}_z f$ --- форма типа $(0,1)$ с компактным носителем, поэтому по следствию~\ref{cor:supp}
+	\[v = \bar{\partial}_z\int_\Omega K_{BM}^{0,0} =:\bar{\partial}_zu.\]
+	Полученная нами $u$ также иммет компактный носитель. 
+	
+	Действительно: при $|z|\gg 1$ можно считать что 
+	\begin{equation}\label{u~0}
+		K_{BM}^{0,0}(z,\xi) \sim\frac{1}{|z-\xi|^{2n-1}}, \quad\Longrightarrow \quad u \sim \frac{1}{|z|^{2n-1}},
+	\end{equation}
+	и $u(z)$ при $|z|\gg 1$ голоморфна. С другой стороны, если $n\geq 2$, то существует комплексная прямая $l$, которая лежит в $\mathbb{C}^n$ и не пересекает $\operatorname{supp} v$. Тогда $u|_l$ голоморфна и ограничена, значит по теореме Лиувилля и формуле \eqref{u~0} в ограничении $u|_l = 0$.
+	
+	Таким образом, положив $F = \tilde f - u$, получим, что $\bar{\partial}_zF=0$ и $F = f$ вне окрестности $K$.
+\end{proof}
+
+\subsection{\texorpdfstring{$\bar{\partial}$-лемма Пуанкаре}{d-bar-лемма Пуанкаре}}
+Если $\bar{\partial} u = v$, $\bar{\partial} v = 0,$ и $v$ имеет компактный носитель,  
+то у нас есть решение $u$ с компактным носителем.
+
+\begin{theorem}[$\bar{\partial}$-лемма Пуанкаре]\label{th:dbar-poincare}
+	Пусть $B(0,R)$ --- шар в $\mathbb{C}^n$, пусть $v$ --- форма типа $(p,q)$ такая, что $\bar{\partial} v = 0$ тогда в $B(0,R)$ существует форма $u$: $v=\bar{\partial}u$
+\end{theorem}
+\begin{proof}
+	Используем следующий трюк: берем на $\mathbb{C}^n\times \mathbb{C}^n \times \mathbb{C}^n$ форму 
+	\begin{multline*}
+		K(z,w,\xi)= C_n \sum_{j=1}^n (-1)^{j+1}
+		\frac{w^j-\overline{\xi}}{((z-\xi)(w-\xi))^n} 
+		d(z^1 - \xi^1)\wedge \cdots \wedge d(z^n - \xi^n) \wedge {} \\
+		\wedge  d(w^1 - \overline \xi^1)\wedge \cdots 
+		\wedge \widehat{d(w^j - \overline \xi^j)} \wedge \cdots 
+		\wedge d(w^n - \overline \xi^n),
+	\end{multline*}
+	заметим, что если положить $w = \overline z$, то получим $K_{BM}(z,\xi)$. Пусть $\psi$ --- гладкая функция,$\psi =1$ на $B(0,1)$ с компактным носителем. Тогда по формуле Коппельмана \eqref{Koppelman formula} имеем
+	\[\psi(z)v(z) = \bar{\partial}_z \int_{B(0,R)} K_{\mathrm{BM}}^{p,q-1}(z,\xi) \wedge 
+	\psi(\xi) м(\xi)+ \int_{B(0,R)} K_{\mathrm{BM}}^{p,q}(z,\xi) \wedge 
+	\bar{\partial}\psi(\xi) \wedge v(\xi).\]
+	т.е. $\psi(z)v(z) = \bar{\partial}u_0+v_1$. Пусть теперь
+	\[\tilde v_1(z,w) = \int K^{p,q}_{\mathrm{BM}}(z,w,\xi) \wedge 
+	\overline{\partial}\Psi(\xi) \wedge v(\xi), \]
+	где $K^{p,q}(z,w,\xi)$ --- это часть $K(z,w,\xi)$, которая имеет степень $p$ по $z$ и $q$ по $w$. $\tilde v_1(z,w)$ определена на множестве \[U = \{(z,w)\in B(0,1)\times B(0,1) |\forall  \xi \colon |\xi| > 1 \quad \Re ( (z - \xi)(w - \overline{\xi})) > 0\}.\] 
+	
+	Заметим, что если $(z,w)\in U$, то $(z,tw)\in U, t\in[0,1]$. Тогда 
+	$v_1 = g^* \widetilde{v}$, где $g \colon \mathbb{C}^n \to \mathbb{C}^n \times \mathbb{C}^n$, $z \mapsto (z,\overline{z})$ и $0=\bar{\partial}v_1 = \bar{\partial}g^* \tilde v_1 = g^*\partial_wv_1$, откуда $\partial_w \tilde{v}_1=0$.
+\end{proof}
+
+
+
+\newpage
+\section{Лекция 5}
+\subsection{Локальное поведение голоморфных функций}
+
+Пусть $z_0 \in \mathbb{C}^n$, а функции $f$ и $g$ голоморфны. 
+
+\begin{definition}
+	Будем говорить, что $f\sim g$ в точке $z_0$, если существует окрестность $U = U(z_0)$, такая что $f|_U = g|_U$.
+\end{definition}
+Откуда, если рассмотреть, например, полидиск с центров в точке $z_0$, то можно неформально сказать следующее:
+\begin{proposition}
+	Если $f\sim g$, то их разложения около точки $z_0$ совпадают.
+\end{proposition}
+
+Далее для удобства будем считать $z_0 =0$.
+
+\begin{definition}
+	Класс эквивалентности $f$ в $z_0 ~(=0)$ называется \term[росток]{ростком} функции $f$.
+	
+	А $\mathscr{O}_n$ ---  означает \term[кольцо голоморфных функций]{кольцо голоморфных функций} (оно изоморфно алгебре сходящихся степенных рядов).
+\end{definition}
+
+Рассмотрим некоторые алгебраические свойства $\mathscr{O}_n$.
+
+\begin{proposition}
+	\begin{enumerate}
+		\item $\mathscr{O}_n$ --- область целостности.
+		\item $\mathscr{O}_n$ --- локальное кольцо, оно имеет единственный максимальный идеал $m_0 = \{f \in \mathscr{O}_n |f(0) = 0\}$.
+	\end{enumerate}
+\end{proposition}
+
+Из обычного комплексного анализа $(n=1)$ мы знаем, что любая голоморфная функйция представляется как $f(z) = z^k \cdot h(z)$, где $h(0)  \neq 0$. Как нам получить нечто похожее для многомерного случая?
+
+Логично предположить, что результатом должно оказаться нечто вида $f(z) = g(z) \cdot h(z)$, где $g$ --- полином, а $h(0) \neq 0$, однако оказывается, что достичь подобного результата не удается.
+
+Далее будем обозначать $n$ переменных как $(z^1,\dots, w)$
+
+Если $f(0) \neq 0$, то тогда можно счиатать $g =1$, $f=h$. Предположим, что $f(0,\dots,0) = 0$, но не $f \not\equiv 0$, тогда можно считать что $f(0,\dots,0,w) \not\equiv 0$. Ясно, что существует $\delta,r >0$, такие что $|f(0,w)|>\delta$, если $r = |w|$. Тогда в силу непрерывности существует $\varepsilon >0$, такое что $|f(z,w)|>\delta/2$, при $r = |w|$ и $|z|<\varepsilon$.
+
+Давайте посмотрим на то, что происходит в $|z|<\varepsilon$, $|w|<r$. При фиксированном $z  = (z^1,\dots,z^{n-1})$ голоморфная функция $f$ от $w$.
+
+\begin{proposition}
+	Пусть $z$ фиксировано, тогда пусть $b_1(z), \dots b_k$ --- нули $f(z,w)$ в $|w|<r$. Тогда верна следующая формула $\forall m  \geqslant0$:
+	\begin{equation}
+		b_1^m + \dots + b_k^m = \frac{1}{2\pi i} \int \limits_{|w|=r} \frac{\xi^m\partial_wf(z,w)}{f(z,w)}dw. \label{sumb}
+	\end{equation}
+\end{proposition}
+\begin{proof}
+	Опустим для удобства зависимость от $z$, тогда $f(w) = w^kh(w)$, $f'(w) = k w^{k-1} h(w)+w^kh'$. Тогда
+	\[\frac{f'(w)}{f(w)} = \frac{k}{w}+\frac{h'}{h}.\]
+	А значит 
+	\[\frac{1}{2\pi i }\int \limits_{|w|= r} \frac{w^kf'(w)}{f(w)}dw = \sum_{j=1}^k \operatorname{Res}_{bj}\]
+\end{proof}
+
+Вспомним некоторые знания из курса алгебры --- если $\sigma(b_1,\dots, b_k)$ --- элементарные симметрические полиномы от $b_j$, то они могут быть выражены через 
+\[\sum_{j=1}^k b_j^m, \qquad \text{где}\quad m=1,\dots,k.\]
+
+Вернемся теперь к $g_f(z,w)= w^k - \sigma_1(b(z_1)w^{k-1}, \ldots, b(z_k)) w^{k-1} 
++ \ldots + (-1)^k \sigma_k(b(z_1), \ldots, b(z_k))
+$ в разложении $f$. Перед тем как дать новое определение, заметим что, $\sigma_i(z_1,\dots,z_{n-1})$ голоморфно зависит от первых $n-1$ переменных, т.к. интеграл \eqref{sumb} зависит голоморфно от $z$.
+
+\begin{definition}
+	\term[Полином Вейерштрасса]{Полиномом Вейерштрасса} называется полином вида
+	\[w^k+a_1(z)w^{k-1}+\dots +a_k(z),\]
+	где $a_j(z)$ - голоморфные функции от $z = (z^1,\dots,z^n)$.
+\end{definition}
+
+Рассмотрим 
+\[h(z,w) = \frac{1}{2\pi i}\int\limits_{|w|=r}\frac{f(z,\xi)}{g_f(z,\xi)}\frac{d\xi}{\xi-w}\]
+тогда 
+\begin{proposition}
+	$h(0) \neq 0.$
+\end{proposition}
+
+\begin{theorem}
+	Пусть $f\in \mathcal{O}_n$, $f(0) = 0$, $f(0,\dots,w) \not\equiv 0$. Тогда $f$ единственным образом представимо в виде 
+	\[f(z,w)=g_f(z,w)h(z,w),\]
+	где $g_f$ --- полином Вейерштрасса, а $h(0) \neq 0$.
+\end{theorem}
+\begin{remark}
+	Заметим также слудующее: пусть $Z(f)= \{(z,w)\in\mathbb{C}^n|f(z,w)=0\}$, тогда $Z(f)$ проектируется на $\{w=0\}$, причем эта проекция --- конечное накрытие вне множества нулей голоморфной функции от $z^1,\dots,z^{n-1}$
+	
+\end{remark}
+\textbf{ТУТ ПОПРАВИТЬ и добавить про вандермонда и детерминант}
+
+\begin{lemma}
+	Кольцо $\mathscr{O}_n$ факториально, т.е. $\mathscr{O}_n$ целостно и:
+	
+	\begin{enumerate}
+		\item [a)] каждый ненулевой росток $f \in \mathscr{O}_n$ допускает разложение $f = f_1 \cdots f_N$ на неприводимые элементы;
+		
+		\item [b)] разложение единственно с точностью до обратимых элементов.\footnote{Боле подробно можно прочитать в \cite{Demailly2012}((2.10) Theorem.)}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	Докозательство будем проводить индукцией по $n$. Пусть $\mathscr{O}_{n-1}$ --- кольцо ростков голоморфных функций от $z^1\dots z^{n-1}$. Пусть $\mathscr{O}_{n-1}$ факториально, тогда по теореме Гаусса $\mathscr{O}_{n-1}[w]$ тоже факториально. 
+	
+	Пусть $f = g_fh$, где $g_f$ - полином Вейерштрасса. Тогда $f = g_1 \dots g_m h$, где  $g_j$ --- неприврдимы.Предположим, что $f$ имеет другое разложение
+	\[
+	f = \tilde f_1 \cdots \tilde f_p.
+	\]
+	Каждое $\tilde f_j$ также является многочленом Вейерштрасса, умноженным на обратимый элемент, то есть
+	\[
+	\tilde f_j = \tilde g_j  h_j, \qquad j=1,\ldots,p,
+	\]
+	где $\tilde g_j$ неприводим в $\mathscr{O}_{n-1}[w]$, а $h_j$ обратим. Следовательно,
+	\[
+	g_1 \cdots g_m \cdot h =
+	\prod_{j=1}^p \tilde g_j
+	\prod_{j=1}^p h_j.
+	\]
+	Так как $\mathscr{O}_{n-1}[w]$ факториально по предположению индукции, разложения $g$ и $\tilde g_1 \cdots \tilde g_p$ совпадают с точностью до единиц. Отсюда следует, что и разложение $f$ единственно с точностью до обратимых множителей. 
+\end{proof}
+
+\begin{proposition}
+	Пусть $f_1,f_2 \in \mathscr{O}_n$  --- взаимно простые элементы. Тогда для $z_0 \in \mathbb{C}^n$ достатчно близких к нулю ростки $f_1,f_2$ тоже будут взаимно просты. 
+\end{proposition}
+\begin{proof}
+	Существуют $m_1,m_2 \in \mathscr{O}_n[w]$, $r\in O$ такие что $m_1f_1+m_2f_2=r$. 
+	\textbf{ДОПИСАТЬ}
+	
+\end{proof}
+
+
+\begin{theorem}[Вейерштрасса о делении]
+	Пусть $f$ --- голоморфная функция, $f(0) =0,$ (но $f\not\equiv 0$), $g$ --- полином Вейерштрасса, тогда существует и притом единственные $h,r$ такие, что:
+	\[f = gh+r,\]
+	причем $r$ --- полином Вейерштрасса  такой что $\deg_wr<\deg_wg$.
+\end{theorem}
+\begin{proof}
+	Возьмем 
+	\[h(z,w) = \frac{1}{2\pi i}\int\limits_{|w|=r} \frac{f(z,\xi)}{g(z,\xi)}\frac{d\xi}{\xi-w},\]
+	определим 
+	\begin{multline*}
+		r(z,w) = f(z,w) - g(z,w)h(z,w) =\\ =\frac{1}{2\pi i}\int\limits f(z,\xi) - \frac{f(z,\xi)}{g(z,\xi)}g(z,w)\frac{d\xi}{\xi-w} = \frac{1}{2\pi i}\int\frac{f(z,\xi)}{g(z,\xi)}\bigg[\frac{g(z\xi)-g(z,w)}{\xi-w}\bigg]d\xi
+	\end{multline*}
+	Т.к. $g$ --- полином Вейерштрасса, то разность в числителе в квадратных скобках перепишется как 
+	\[g(z,\xi)-g(z,w) = \xi^k-w^k+a_1(\xi^{k-1}-w^{k-1}) +\dots+a_{k-1}(\xi-w),\]
+	а значит делится на знаменатель и формула переписывается как:
+	\[\frac{1}{2\pi i}\int\frac{f(z,\xi)}{g(z,\xi)}P(z,\xi,w)d\xi.\]
+	Т.е мы получили полином по $w$ степени $k-1$ или ниже.
+\end{proof}
+
+\begin{corollary}
+	$f\in\mathscr{O}_n$ неприводимо, $h$ зануляется на $Z(f) = \{f=0\}$. Тогда $f$ делит $h$.
+\end{corollary}
+
+Пусть $\Omega \subset\mathbb{C}^n$.
+\begin{definition}
+	$V\subset \Omega$ --- \term[аналитическое множество]{аналитическое множество}, если  $\forall z\in V$ существуует $U = U(z)$ и голоморфные функции $f_1,\dots, f_k$ такие, что $V\cap U = \{f_1=\dots=f_k=0\}$.
+\end{definition}
+
+\begin{theorem}
+	\begin{enumerate}
+		\item[1)] Разложение 
+		\[V = V_{smooth}\cup V_{sing},~~ \text{где}~~ V_{sing} = \{z\in V| V ~\text{не является подмногообразием}\}\]
+		является нигде неплотным и $\dim V = \dim V_{smooth}$. 
+		\item[2)] Для почти любого $\mathbb{C}^k \subset \mathbb{C}^n$, где $k = \dim V$ проекция $A \colon \mathbb{C}^n \to \mathbb{C}^k$, ограниченная на $V$ --- это разветвленное накрытие.
+		\item[3)] $V = V_0 \supset V_2 \supset \dots \supset V_k=\varnothing$, где $V_j\textbackslash V_{j+1}$ --- подмногообразие в $\Omega\textbackslash V_{j+1}$.
+	\end{enumerate}
+\end{theorem}
+
+\section{Лекция 6}
+\setcounter{section}{6}
+\setcounter{theorem}{0}
+
+\subsection{Почти комплексное многообразие}
+Как мы определяли во второй лекции ---пусть $X$ -- комплексное многообразие размерности $n$. В каждой точке $z\in X$ на $T_zX_{\mathbb{R}}$ есть оператор $J_z$ такой, что $J_z^2 = -\operatorname{Id}$. 
+Теперь же посмотрим что будет, если мы сначала возьмем $M$ - вещественное многообразие размерности $2n$ и дадим следующее определение.
+\begin{definition}
+	Вещественное многообразие $M$ размерности $2n$ с тензорным полем $J \colon TM \to TM$ называется \term[почти комплексное многообразие]{почти комплексным многообразием} $(M,J)$.
+\end{definition}
+\textbf{Будет ли $(M,J)$ комплексным многообразием?} Ответ: \textbf{нет}.
+
+На комплексном многообразии есть \hyperref[subsec:derham]{разложение} $d = \partial +\bar{\partial}$, которое по следствию \ref{cor:derham} обладает свойствами $\partial^2 = \bar{\partial^2}=0$ и $\partial\bar{\partial} = - \bar{\partial}\partial$. Заметим, что на $(M,J)$ есть разложение дифференциальных форм 
+\[\Lambda^k(M,\mathbb{C}) \cong\bigoplus_{p+q=k}\Lambda^{p,q}M\]
+С другой стороны $d \colon \Lambda^{p,q}M \to \Lambda^{k+1}(M,\mathbb{C})$ посмотрим что ломается:
+\begin{example}
+	В случае $k=1$, $p=1$, $q=0$ $\alpha \in \Lambda ^{1,0}M$ ее дифференциал 
+	\[d\alpha \in \Lambda^{2,0}M+\Lambda^{1,1}M+\Lambda^{0,2}M.\]
+	Пусть $Z_1, Z_2$ --- комплекснозначные векторные полня на $M$ типа $(0,1)$, напомним, что еслм $TM\otimes\mathbb{C}$, а $X$ --- вещественное векторное поле, то 
+	\[
+	Z_1 = \tfrac{1}{2}\bigl(X + iJX\bigr) \quad \text{--- векторное поле типа } (0,1),
+	\]
+	\[
+	V = \tfrac{1}{2}\bigl(X - iJX\bigr) \quad \text{--- поле типа } (1,0).
+	\]. Тогда по формуле Картана
+	\[
+	d\alpha(Z_1, Z_2) =
+	Z_1 \big(\alpha(Z_2)\big)
+	- Z_2 \big(\alpha(Z_1)\big)
+	- \alpha \big([Z_1, Z_2]\big) = -\alpha\big([Z_1, Z_2]\big).
+	\]
+	Т.к. $Z_1$ и $Z_2$ произвольные поля типа $(0,1)$, такие что $[Z_1,Z_2]$ - векторное поле $(1,0)$, то получим, что $(0,2)$ часть $d\alpha$ не равна 0. Т.е. препятивие для $(M,J)$ быть комплексным многообразием, в том, что $T^{0,1}_M$ и $T^{1,0}_M$ не замкнуты относительно коммутатора.
+\end{example}
+
+\begin{definition}
+	Песть $X$, $Y$ --- вещественные векторные поля на $M$. Тензор 
+	\[N(X,Y) = [X,Y]  - i\big([JX,Y]+[X,JY]\big)-[JX,JY]\]
+	называется \term[тензор Нийенхейса]{тензором Нийенхейса}.
+\end{definition}
+\begin{theorem}[Ньюлендер-Ниренберг]
+	Почти комплексное многообразие является комплексным тогда и только тогда, когда тензор Ниенхейса $N(X,Y) =0$ для любых $X,Y$.
+\end{theorem}
+Полное доказательсво этой теоремы не будет приведено тут и мы дадим лишь набросок.
+\begin{proof}
+	Если $N \equiv0$, то формально $d=\partial+\bar{\partial}$ на $1$ формах, а значит $\bar{\partial}=0$. Мы будем решать уравнение $\bar\partial f = g$, где $g$ --- 1 форма $\bar{\partial}g=0$.  С помощью $L^2$ теории для уравнения выше можно показать, что любоая $(0,1)$ форма $\alpha$ с $d\alpha =0$ является дифференциалом функции $f$ такой что $\bar{\partial}f=0$. 
+\end{proof}
+\begin{lemma}
+	Пусть $\alpha$ -- форма типа $(p,q)$, тогда 
+	\[d\alpha \in \Lambda ^{p+1,q}M\oplus \Lambda ^{p,q+1}M\oplus \Lambda ^{p+2,q-1}M\oplus \Lambda^{p-1,q+2}M.\]
+\end{lemma}
+\begin{proof}
+	Считаем, что $\alpha=f\alpha_1\wedge\dots\wedge\alpha_p\wedge\beta_1\wedge\dots\wedge\beta_q$, где $\alpha_j$ --- формы типа (1,0), а $\beta$ --- формы типа (0,1). Утверждение леммы сразу следует из 
+	\[
+	d\alpha = df \wedge \alpha_1 \wedge \cdots \wedge \alpha_p \wedge \beta_q
+	+ f d\alpha_1 \wedge \alpha_2 \wedge \cdots \wedge \alpha_p \wedge \beta_q
+	- \cdots
+	\pm f \alpha_1 \wedge \cdots \wedge \alpha_p \wedge d\beta_q.\]
+\end{proof}
+\subsection{Свойства комплексных многообразий}
+Дальше считаем, что $X$ --- комплексное многообразие.
+Но перед тем как рассматривать  что-то, докажем несколько вспомогательных лемм и дадим несколько определений.
+
+\begin{lemma}
+	На $X$ существет эрмитова метрика $h=h_{i\bar j}dz^i\wedge d\bar{z}^j=g+i\omega$
+\end{lemma}
+\begin{proof}
+	Следует из разбиелния единыци и склейки.
+\end{proof}
+Определим оператор $\square \varphi$,  $\varphi \in C^\infty(X)$, как 
+\[\square \varphi = h^{j\bar{k}}  \partial_j \partial_{\bar{k}} \varphi
+= \operatorname{tr}_\omega \bigl( \sqrt{-1} \partial \bar\partial \varphi \bigr).\]
+
+Если $\varphi = |f|^2$, то 
+$\square |f|^2 \geqslant 0$. Нетрудно показать что в вещественных координатах
+\[\square |f|^2 = \frac{1}{2}g^{AB}\frac{\partial}{\partial x^A}\frac{\partial}{\partial x^B}|f|^2 = \frac{1}{4} \sum_{i=1}^n 
+\left( \frac{\partial^2}{\partial x_i^2} 
++ \frac{\partial^2}{\partial y_i^2} \right) |f|^2,\] 
+а значит он эллептический. Про которого из курса дифференциальных уравнений известно то, что 
+\begin{theorem}[Принцип максимума] \label{th:max_pr}
+	Если $\square$ --- эллептический оператор и $\square\varphi\geqslant 0$ то $\varphi \equiv const$.
+\end{theorem}     
+
+\begin{proposition}
+	Если $X$ --- комппкт, то все голомоморфные функции на $X$ --- тожедественные константы.
+\end{proposition}
+\begin{proof}
+	Пусть $f$ --- голоморфная функция на $X$,
+	\[
+	\partial \bar\partial f = 0 
+	\quad\Longrightarrow\quad
+	\overline{\partial \bar{\partial} f} = \bar\partial\partial \bar f = - \partial \bar\partial\bar f.
+	\]
+	тогда $\sqrt{-1}\partial\bar{\partial}|f|^2 = \sqrt{-1}\partial f\wedge \bar\partial f$, а значит $\square|f|^2 \geqslant 0$ и по \hyperref[th:max_pr]{теореме максимума} она константа.
+\end{proof}
+
+\begin{example}
+	$\Lambda$ -- решетка в $\mathbb{C}^{n}$, $\Lambda\cong \mathbb Z^{2n}
+	$. $\Lambda$ действует на $\mathbb{C}^n$ сдвигами. На $\mathbb{C}^n/\Lambda$ существует структура комплексного многообразия.
+	Пусть $\Lambda_1 = \mathbb{Z}^4 \subset \mathbb{C}^2$, а
+	\[
+	\Lambda_2 = \operatorname{span}_{\mathbb{Z}}
+	\left\{ 
+	\begin{pmatrix} \alpha_i \\ \beta_i \end{pmatrix} \colon i=1,2,3,4
+	\right\}.
+	\]
+	Это решётка, порождённая векторами 
+	\[
+	\begin{pmatrix} \alpha_i \\ \beta_i \end{pmatrix}, \quad i=1,\dots,4.
+	\]
+	Если $\alpha_1,\dots,\alpha_4,\beta_1,\dots,\beta_4$ независимы над $\mathbb{Q}$, то
+	$\mathbb{C}^2 / \Lambda_1 $ не биголоморфно на $ \mathbb{C}^2 / \Lambda_2$
+\end{example}
+\begin{example}
+	Рассмотрим $M = \mathbb{C}^{n+1}\textbackslash\{0\}$, на нем действуеи $\mathbb{C}^* \curvearrowright M$ как 
+	\[(z_0,\dots,z_n) \to (\lambda z_0,\dots,\lambda z_n), \quad\lambda \in \mathbb{C}^*.\]
+	Фактор $M/\mathbb{C}^* = \mathbb {CP}^n$. Рассмотрим $[z_0 \colon \dots \colon z_n]$ --- класс эквивалентности $(z_0,\dots,z_n)$ под действием $\mathbb{C}^*$. Пусть $U_j = {z_j\neq 0}$ тогда $Z \colon =[z_0 \colon \dots \colon z_j \colon \dots \colon z_n] = [z_0/z_j \colon \dots \colon 1 \colon \dots \colon z_n/z_j]$, обозначим $w^k = z_k/z_j, k\neq j$, тогда $U_j \cong \mathbb{C}^n$. ТОгда рассмотрим $Z\in U_i\cap U_m$ тогда  $Z$ имеет 2 набора координат отвечающих двум картам как $w_m^k = w^k_j\frac{z_j}{z_m}$, т.е. функции перехода оказались голоморфными. 
+\end{example}
+
+\begin{example}
+	Рассмотрим грассманиан 
+	\[\operatorname{Gr}(k,n) = \{\text{множество $k$-мерных подространств в}~ \mathbb{C}^n\}.\]
+	Пусть $L \in \operatorname{Gr}(k,n)$
+	\[
+	A_{L} =
+	\begin{pmatrix}
+		a_{11} & \cdots & a_{1k} \\
+		\vdots & \ddots & \vdots \\
+		a_{n1} & \cdots & a_{nk}
+	\end{pmatrix},
+	\qquad
+	\text{где } 
+	a_j =
+	\begin{pmatrix}
+		a_{1j} \\
+		\vdots \\
+		a_{nj}
+	\end{pmatrix}
+	- j\text{-й базисный вектор в базисе $L$}.
+	\]
+	А $L = \operatorname{span}(a_1,\dots, a_k)$ и $\operatorname{rk}A_L = k$, следовательно выберем $I = \{ i_1, \ldots, i_k \}$, такие что
+	\[
+	A_I =
+	\begin{pmatrix}
+		a_{i_1 1} & \cdots & a_{i_1 k} \\
+		\vdots    & \ddots & \vdots    \\
+		a_{i_k 1} & \cdots & a_{i_k k}
+	\end{pmatrix}.
+	\]
+	является невырожденной $\det A_I \neq 0$. Обозначим за $U_I = \{A_l|\det A_I \neq 0\}$, тогда 
+	\[
+	A A_I^{-1} =
+	\begin{pmatrix}
+		\tilde a_{11} & \cdots & \tilde a_{kn} \\
+		1      & \cdots & 0      \\
+		0      & \ddots & 0      \\
+		0      & \cdots & 1
+	\end{pmatrix}.
+	\]
+	$U_I \cong \{\text{Матрицы из $k$ столбцов и строк такие что $A_I = \operatorname{Id}$}\}$. Если $L \in U_{I} \cap U_{J}$, то функции из $A_I A_J^{-1}$ задают
+	функции перехода. Кроме того,
+	$\dim \operatorname{Gr}(k,n) = k(n-k).$
+\end{example}
+\newpage
+
+\section{Лекция 7}
+\setcounter{section}{7}
+\setcounter{theorem}{0}
+Приведём ещё несколько примеров
+\begin{example}[Многообразие Хопфа] \label{ex:Hopf}
+    Рассмотрим $\mathbb{C}/\{0\}$ и $\alpha \in \mathbb{C}^*$, $|\alpha|<1$. Определим действие 
+    \begin{align*}
+        &\mathcal A \colon \mathbb{C}^n\textbackslash \{0\} \to \mathbb{C}^n\textbackslash \{0\}, & z \to \alpha z.
+    \end{align*}
+Тогда степени $\mathcal{A}$ порождают действие $\mathbb Z$. Иными словами 
+\begin{align*}
+&M_n = (\mathbb{C}^n\textbackslash \{0\})/\sim, &z \sim \alpha^kz \quad(k\in \mathbb Z).
+\end{align*}
+Многообразие $M = \mathbb{C}^n/\mathbb Z$ называется \term[многообразие Хопфа]{многообразием Хопфа}. 
+
+Заметим, что как вещественное многообразие $M_n \cong S^{2n-1}\times S$. Явно увидеть это можно, если ввести полярные координаты на $\mathbb{C}\textbackslash \{0\} \cong S^{2n-1}\times \mathbb{R}$. Пусть для простоты рассмотрим вещественное $\alpha =1/2$. Тогда рассмотрев действие степеней отобраджения $\mathcal A$ на $(r,\theta)$, получим, что $\mathcal{A}(r,\theta) = (r/2,\theta)$. Заметим также что есть отображение $M_n \to \mathbb{CP}^{n-1}$ со слоем $T^2$
+\end{example}
+
+\begin{example}[Многообразие Ивасавы] \label{ex:ivasava}
+  Рассмотрим группу всех верхнетреугольных матриц $G$ и дискретную подгруппу $G_\mathbb Z$\footnote{Множество $Z[\sqrt{-1}]$ называют ещё \term[гауссовы числа]{гауссовыми числами}}.
+    \begin{align*}
+    &G = \left\{ 
+\begin{pmatrix}
+1 & a & b \\
+0 & 1 & c \\
+0 & 0 & 1
+\end{pmatrix}
+\middle| a,b,c \in \mathbb{C} \right\}, & G_{\mathbb{Z}} = \left\{ 
+\begin{pmatrix}
+1 & a & b \\
+0 & 1 & c \\
+0 & 0 & 1
+\end{pmatrix}
+\middle| a,b,c \in \mathbb{Z}[\sqrt{-1}] \right\}.
+\end{align*}
+Тогда можно показать, что многообразие $G/G_{\mathbb Z}$ существует и называется \term[многообразие Ивасавы]{многообразием Ивасавы}.
+\end{example}
+    В дальнейшем будет показано, что многообразия из примеров \ref{ex:Hopf} и \ref{ex:ivasava} не являются проективными подмногообразиями.
+
+\subsection{Канонические и касательные расслоения}
+
+\begin{definition}
+    Пусть $X$ --- комплексное многообразие, $T_X$ --- касательное расслоение, $T^*_X = \Omega_X$ --- кокасательное расслоение. Тогда \term[Каноническое расслоение]{каноническим расслоением} называется $K_X = \det(\Omega_X) = \Lambda^nT^*_X$ расслоение $(n,0)$ - форм, где $n = \dim_{\mathbb{C}} X$
+\end{definition}
+
+Заметим, что если $X$ - многообразие Хопфа, то вещественное касательное расслоение тривиально. Действительно, т.к. $X = S^1\times S^{2n-1}$, то $(T_X)_\mathbb{R} \cong \pi_1^*TS^1 \oplus \pi_2^* TS^{2n-1}$, т.к. $TS^1$ тривиально. Однако оно не будет голоморфном тривиальным.
+
+Касательное расслоение к грассманиану $\operatorname{Gr(k,n)}$. Обозначим за $S$ - тавтологическое расслоение. Его слой над $[L] \in \operatorname{Gr}(k,n)$ --- это $L$. 
+
+Заметим, что $GL(n,\mathbb{C})$ действует транзитивно на $\operatorname{Gr}(k,n)$. Стабилизатор $L$ --- это такие $\{\mathcal A \in GL(n,\mathbb{C})\}$, что $\mathcal A(L) = L$. Касательное расслоение к $GL(n,\mathbb{C})$ --- это $\operatorname{Hom} (V,V)$, где $V$ --- $n$ мерное векторное пространство на $\mathbb{C}$. Тогда касательное пространство к стабилизатору $L$ --- это $a\in \operatorname{Hom} (V,V)$, $a(L) \subset L$, следовательно 
+\[T_{[L]}\operatorname{Gr}(k,n)\cong\operatorname{Hom(V,V)}/\{a|a(L)\subset L\} \cong \operatorname{Hom}(L,V/L),\]
+последнее  следует из вида топреатора такого что $a (L) \subset L$:
+\[a = \begin{pmatrix}
+a_1 & a_2 \\
+0   & a_3
+\end{pmatrix}.\]
+\begin{proposition}
+$T\operatorname{Gr}(k,n)\cong \operatorname{Hom}(S,V/S)$, где $\underline{V}$ --- тривиальное голоморфное расслоение нал $\operatorname{Gr}(k,n)$.
+\end{proposition}
+\begin{proof}
+Изоморфизм был доказан в рассуждении выше, а утверждение о голоморфности следует из точной последовательности расслоений 
+\[0 \to S\hookrightarrow \underline{V} \to  \underline{V}/S \to 0\]
+\end{proof}
+
+Дальше перейдем к рассмотрению грассманианов с $k=1$ тобишь к проектвным пространствам $\mathbb{CP}^n$. 
+\begin{definition}
+На $\mathbb{CP}^n$ $S$ образует $\mathcal{O}(-1)$ --- это одномерное\term[голоморфное линейное расслоение]{голоморфное линейное расслоение}. 
+\end{definition}
+И имеется такая точная последовательность 
+\[0 \to \mathcal{O}(-1) \to \underline{V} \to \underline{V}/\mathcal{O}(-1) \to 0.\]
+Далее обозначим $Q = \underline{V}/\mathcal{O}(-1)$, $\dim V = n+1$
+
+Соответственно в довесок к $\mathcal{O}(-1)$ также определим: 
+\begin{definition}
+    Стандартные обозначения для линейных расслоений:
+\begin{align*}
+\mathcal{O}(1)&:=\mathcal{O}(-1)^{*},\quad
+\mathcal{O}(k)=\mathcal{O}(1)^{\otimes k},\quad
+\mathcal{O}(-k)=\mathcal{O}(-1)^{\otimes k},\quad
+k=0,1,2,\ldots
+\end{align*}
+\end{definition}
+
+\begin{proposition}
+    На $\mathbb {CP}^n$ существует короткая точная последовательность расслоений, называется \term[последовательность Эйлера]{последовательностью Эйлера}
+    \[0 \to \mathcal O_{\mathbb{CP^n}} \to \mathcal O(1)^{\oplus(n+1)}\to T_{\mathbb{CP}^n}\to 0\]
+\end{proposition}
+\begin{proof}
+    Т.к. $T_{\mathbb{CP}^n} \cong \operatorname{Hom}(\mathcal{O}(-1),\underline{V}/\mathcal{O}(-1)) \cong O(1)\otimes (\underline{V}/\mathcal{O}(-1)) \cong \mathcal{O}(1)^{\oplus(n+1)}/\mathcal{O}$
+\end{proof}
+\begin{corollary}
+    $T_{\mathbb{CP}^n}\cong Q \otimes \mathcal{O}(1)$
+\end{corollary}
+Заметим, что $\mathcal O(-1)=\{(Z,\xi)\in \mathbb{CP}^n\times V \mid \xi\in \mathbb{C}\cdot z\}.$ Любой однородный полином степени 1 от $z_0,\dots,z_n$ является сечением $\mathcal O(1)$.
+
+
+
+
+
+\begin{definition}
+    Путсь $U\subset X$ - открытое подмножество в $X$. \term[мероморфная функция]{Мероморфной функцией} $f$ на $U$ называется функция, которая локально является отношеним голоморфных функций $f=g/h$.
+
+    $f$ мероморфна на $X$, если существует покрытие $\{U_i\}$ и на каждом $U_i$ $f = g_i/h_i$
+\end{definition}
+\begin{example} \label{ex:meromorph}
+    Пусть $s_1$, $s_2$ - два голоморфных сечения голоморфного векторного расслоения $L\to X$.  Тогда $s_1/s_2$ - мероморфная функция на $X$.
+\end{example}
+
+\begin{proposition}
+    Пусть $\mathbb{C} [z_o,\dots, z_n]_k$ пространство однородных многочленов степени $k$, тогда это пространство глобальных голоморфных сечений $\mathcal{O}(k)$ на $\mathbb {CP}^n$.
+\end{proposition}
+\begin{proof}
+    В одну сторону очевидно. В обратную: пусть $S$ --- голоморфное сечение $\mathcal O(k)$. $s_0$ --- элемент $\mathbb{C} [z_0,\dots,z_n]_k$, из примера \ref{ex:meromorph} $f = S/s_0$ --- мероморфна на $\mathbb{CP}^n$. Рассмотрим $\pi \colon \mathbb{C}^{n+1}\textbackslash\{0\} \to \mathbb{CP}^n$, тогда $\pi^*f=F$ --- это мероморфная функция на $\mathbb{C}^{n+1}\textbackslash\{0\}$, тогда $G = Fs_0$ --- голоморфная функция там же, тогда $G$ продолжается на $\mathbb{C}^{n+1}$. $G$ --- однородный многочлен степени $k$.
+\end{proof}
+
+\begin{proposition}
+	Пусть $L\to X $ --- голоморфное линейное расслоение над компактным $X$. Если $L$ и $L^{-1} := L^*$ имеют голоморфные сечения, то $L$ тривиально.
+\end{proposition}
+\begin{proof}
+    
+\end{proof}
+
+\begin{corollary}
+    $\mathcal{O}(-k)$ не имеют голоморфных сечений.
+\end{corollary}
+
+\subsection{Подмногообразия}
+\begin{definition}
+    Я потом допишу определение все-таки сюда
+\end{definition}
+
+\begin{example}[Вложение Веронезе]
+    \begin{align*}
+        &\mathbb{CP}^n \hookrightarrow \mathbb{CP}^{\binom{n+1}{k} - 1}, &[z_0 \colon \dots \colon z_n] \longmapsto
+\big[ z_0^{a_0}\cdots z_n^{a_n}\big]_{a_0+\cdots+a_n=k}.
+    \end{align*}
+    Т.е. мы берем все мономы от переменнных $z^0,\dots,z^n$ и т.к. хотябы один из $z^i$ не нулевой, то хотябы одна компонента в образе тоже не нулевая. Это вложение корректно определено и более того явлется голоморфным отображением.
+\end{example}
+
+
+\begin{example}[Вложение Сегре]
+    \begin{align*}
+\mathbb{CP}^n\times\mathbb{CP}^m
+&\longrightarrow \mathbb{CP}^{(n+1)(m+1)-1},\\
+([z_0 \colon \cdots \colon z_n],[w_0 \colon \cdots \colon w_m])
+&\longmapsto \big[z_i w_j\big]_{0\leq i\leq n,0\leq j\leq m} \\
+&= \big[ z_0w_0 \colon z_0w_1 \colon \cdots \colon z_0w_m \colon z_1w_0 \colon \cdots \colon z_n w_m \big].
+\end{align*}
+это легко проиллюстрировать на примере $\mathbb{CP}^1 \times \mathbb{CP}^1 \longrightarrow \mathbb{CP}^3$, с координатами $[y_0 \colon y_1 \colon y_2 \colon y_3]$ т.е. 
+\[
+[z_0 \colon z_1][w_0 \colon w_1] \longmapsto [z_0w_0 \colon z_1w_1 \colon z_0w_1 \colon z_1w_0]
+\]
+и оьраз лежит в $y_0y_1=y_2y_3$.
+\end{example}
+
+\begin{example} [Вложение Плюккера]
+    \[
+\mathrm{Gr}(k,n)\ \hookrightarrow\ \mathbb{CP}^{\binom{n}{k}-1}
+\]
+\[
+L=\operatorname{span}(a_1,\dots,a_k)\ \longmapsto\ a_1\wedge\cdots\wedge a_k
+\]
+\end{example}
+ТУТ ПРОПИСАТЬ МОТИВИРОВКУ ЗАЧЕМ
+
+Пусть теперь у нас есть $L\to X$ - линейное расслоение, $s_0,\dots, s_k$ --- голоморфные сечения, то $[s_0(z):\dots \colon s_k(z)] \in \mathbb{CP}^k$.
+
+
+\subsection{Касательные и нормальные расслоения к подмногообразиям}
+Пусть $Y\subset X$ --- подмногообразие коразмерности $k$, тогда рассмотрим короткую точную последовательность
+\begin{equation}\label{eq:exact}
+0\to T_Y\to T_{X}|_Y\to N_y \to 0,
+\end{equation}
+$N_Y$ называется \term[нормальное расслоение]{нормальным расслоением}. Понятно, что есть и дуальная последовательность 
+\begin{equation} \label{eq:exactrev}
+0\leftarrow T^*_Y \leftarrow T^*_{X}|_Y \leftarrow N_Y^*\leftarrow0
+\end{equation}
+и $N_Y^*$ называется к\term[конормальное расслоение]{конормальным расслоением}.
+И
+\[
+\det\left(T_X^{*}\Big|_{Y}\right)\simeq
+\det\left(T_Y^{*}\right)\otimes \det\left(N_Y^{*}\right)
+\]
+\begin{proposition}[Формула присоединения] \label{pr:adformula}
+    \[
+K_Y \cong K_X\big|_{Y} \otimes \det(N_Y)
+\]
+\end{proposition}
+
+\begin{proposition}
+Пусть $\pi \colon E\to X$ --- голоморфное векторное расслоение ранга $k$.
+Пусть $s\in \Gamma(X,E)$ --- голоморфное  сечение, такое что $Y=\{x\in X\mid s(x)=0\}.$
+
+Тогда $Y$ --- комплексное подмногообразие коразмерности $k$, тогда
+\[
+E\big|_{Y} \cong N_Yю
+\]
+\end{proposition}
+
+
+\newpage
+\section{Лекция 8}
+\setcounter{section}{8}
+\setcounter{theorem}{0}
+В данной лекции, как и раньше, рассмотрим $Y\subset X$ --- комплексное подмногообразие, а также снова затронем точную последовательность \eqref{eq:exact}. Мы уже доказали \hyperref[pr:adformula]{формулу присоединения}. Теперь мы посмотрим, как, имея $X$ и $Y$, можно построить ещё одно многообразие. 
+
+Для этого вспомним следующее: Пусть $\pi \colon E \to Y$ --- голоморфное векторное $\operatorname{rk} E =r$ расслоение (т.е на $Y$ есть тривиализация $E$ c голоморфными функциями перехода).  Тогда можно сделать новое расслоение $\pi \colon \mathbb P(E)\to Y$, где слой над точной $y\in Y$ --- это проективизация $\mathbb P (E_y)$, ($E_y$ --- слой $E$ над $Y$). 
+
+\begin{proposition}
+    \begin{enumerate}
+        \item $\mathbb P(E)$ является комплексным многообразием размерности $\dim_\mathbb{C} \mathbb P(E) = \dim _\mathbb{C} V+r-1$
+        \item На $\mathbb P(E)$ существцет голоморфное линейное рассление $\mathcal O_E(-1)$, ограниеченое котоорого на $\mathbb P_E$ изоморфна $\mathcal O (-1)$
+    \end{enumerate}
+\end{proposition}
+\begin{proof}
+    
+\end{proof}
+Пусть $U \subset X$ --- открытое подмножество с координатам и $(z_1,\dots, z_n)$. Пусть  $U\cap Y = \{f_1=\dots=f_k=0|f_j \text{- голоморфные функции в $U$, $\operatorname{rk}(f_1\dots f_k)=k$}\}$.
+\begin{proposition}
+    Если $g_1 \dots g_k$ - другая система функций с теми же свойствами,
+    \[U\cap Y = \{g_1=\dots=g_k=0|g_j \text{- голоморфные функции в $U$, $\operatorname{rk}(g_1\dots g_k)=k$}\},\] то тогда существцует матрица $M=(M_{ij})$ из голоморфных функций, такая что $g_i = \sum_{j=1}^kM_{ij}f_j$ и $\det M \neq 0$ в окретности $y$.
+\end{proposition}
+\begin{proof}
+По голоморфной теореме о неявной функции выберем координаты
+$(z_1,\dots,z_n)$ с центром в $y$, в которых
+$f_j=z_j$ для $j=1,\dots,k$, так что
+$Y=\{z_1=\cdots=z_k=0\}$.
+Поскольку каждый $g_i$ обращается в ноль на $Y$, он лежит в идеале
+$(z_1,\dots,z_k)$. Следовательно, существуют голоморфные функции
+$M_{ij}$ такие, что
+\[
+g_i=\sum_{j=1}^k M_{ij} z_j, \qquad i=1,\dots,k.
+\]
+Дифференцируя в точке $y$ (то есть при $z=0$), получаем
+\[
+dg_i|_y=\sum_{j=1}^k M_{ij}(y)dz_j,
+\]
+поскольку слагаемые $z_jdM_{ij}$ исчезают при $z=0$.
+Тем самым матрица перехода между базисами $(dz_1,\dots,dz_k)$ и
+$(dg_1,\dots,dg_k)$ в $T_y^*X$ равна $M(y)=(M_{ij}(y))$.
+Так как $\operatorname{rk} (dg_1,\dots,dg_k)\big|_y=k$, матрица $M(y)$ обратима, то есть
+$\det M(y)\neq 0$. По непрерывности $\det M$ не обращается в нуль
+в некоторой окрестности $U'\ni y$.
+\end{proof}
+
+\textbf{ВСЕ ЧТО НИЖЕ ВЫГЛЯДИТ КАШЕЙ, НАДО БУДЕТ ПОПРАВИТЬ}
+
+Пусть теперь $\{U_\alpha\}$ --- покрытие $X$, тогда, очевидно, что $V_j = U_j\cap Y$ --- покрытие $Y$.
+
+На $U_j$ имеются функции $f_1^j, \dots f_k^j$, такие что $Y \cap U_j = \{f^j_1 = \dots = f_k^j=0\}$ и $\operatorname{rk} (f_1^j, \dots f_k^j)=k$. 
+На пересечении $U_j\cap U_k$ мы имеем две системы функций $Y(U_j\cap U_m) = \{f^j_1 = \dots = f_k^j=0\} = \{f^m_1 = \dots = f_k^m=0\}$. Тогда существует $M^{jm}$ такая что $f^j = M^{jm}f^m$.
+
+\begin{remark}
+    Матрица $M^{jm}|_Y$ задает матрицу перехода для конормального расслоения $N_y^*$.
+
+    Определим матрицу $P_{jm} \colon = (M^{jm})^{-t}$, тогда она задает функции перехлда на $N_y$
+\end{remark}
+
+
+
+Рассмотрим $U\subset X$ и 
+\[
+U \times \mathbb{CP}^{k-1}  \supset 
+\widetilde U_Y
+= \left\{ (w, Z) \in U \times \mathbb{CP}^{k-1}
+\;\bigg|\;
+Z_i f_j = Z_j f_i,\;
+(i,j)=1,\dots,k
+, \ i\neq j \right\}.
+\]
+и отображение
+\[
+\tau \colon \ \widetilde{U}_Y \longrightarrow U, \qquad (w,z) \longmapsto w.
+\]
+
+Если $w\notin Y$, то прообраз $\tau^{-1}(w)$ --- это ровно одна точка. Если же $w\in V$, то прообраз $w$ --- это $\mathbb {CP}^{k-1}$
+
+\begin{definition}
+    $\widetilde U_Y$ называется \term[раздутие $U$ вдоль $Y$]{раздутием $U$ вдоль $Y$}
+\end{definition}
+
+уравнением Обозначим $E = \pi^{-1}(Y)$. Тогда $\widehat{U}_Y \setminus E \cong U \setminus Y$.
+На самом деле  $E$ задается одним уравнением в $\widetilde U_Y$, $Z_jf_i = Z_if_j$. Определим $\tilde f_i \coloneqq \tau^{*}f_i$.
+Если $\tilde f_i = 0$, то и $\tilde f_j = 0$.
+
+
+Пусть $V\subset X$ --- другое открытое множество в $X$, $Y\cap V = \{f_1^V = \dots = f^V_k\}$. Получим раздутие $\widetilde V_Y$ вдоль $Y$.
+
+Пусть $U\cap V\neq\varnothing$.
+Обозначим столбцы функций $\mathbf f^{u}=(f^{u}_1,\dots,f^{u}_k)^{\mathsf T}$ и
+$\mathbf f^{v}=(f^{v}_1,\dots,f^{v}_k)^{\mathsf T}$.
+На пересечении есть обратимая матрица перехода $M^{uv}$, такая что $f^U = M^{UV}f^V$.Для каждого из них свои соотношения  $Z_i f_j^{U} = Z_j f_i^{U}$ и $\hat Z_i \tilde f_j^{U} = \hat Z_j \tilde f_i^{U}.$
+
+Т.е. теперь у нас есть два раздутия
+\[
+\widetilde U_Y
+= \{ (w,Z) \in U \times \mathbb{CP}^{k-1} \mid
+Z_if_j^{u}(w)=Z_jf_i^{u}(w)\ \text{для всех } i,j \}.
+\]
+\[
+\widetilde V_Y
+= \{ (\hat w,\hat Z) \in V \times \mathbb{CP}^{k-1} \mid
+\hat Z_if_j^{v}(\hat w)=\hat Z_jf_i^{v}(\hat w)\ \text{для всех } i,j \}.
+\]
+и функции переклейки между ними
+\[
+\psi_{UV}(w,Z)=\bigl(w,P_{uv}(w)Z\bigr), \qquad
+P_{uv}=(M^{uv})^{-{\mathsf t}} .
+\]
+\begin{theorem}[склейка локальных раздутий]
+Пусть $X$ --- комплексное многообразие, $Y\subset X$ --- подмногообразие комплексной
+коразмерности $k$. Пусть $\{U_j\}$ --- покрытие $X$ и $\widehat U_{j,Y}$ --- раздутие $U_j$ вдоль $Y\cap U_j$.
+На перекрытии $U_u\cap U_v$ задана карта склейки
+\[
+\psi_{UV}(w,Z)=\bigl(w,[P_{uv}(w)Z]\bigr),\qquad P_{uv}=(M^{uv}(w))^{-{\mathsf T}} .
+\]
+Тогда
+\[
+\widehat X_Y \coloneqq \Bigl(\bigsqcup\nolimits_j \widehat U_{j,Y}\Bigr)\Big/\sim,
+\qquad (w,Z)\sim \psi_{UV}(w,Z) \text{ на } U_u\cap U_v,
+\]
+является комплексным многообразием (раздутием $X$ вдоль $Y$).
+
+Более того, существует отображение $\pi \colon \ \widetilde X_Y \to X$, причём $E = \pi^{-1}(Y) \cong \mathbb{P}(N_Y)$ и $\pi \colon \ \widetilde X_Y \setminus E \cong X \setminus Y$. $\widetilde X_Y$ компактно, если $X$ компактно.
+\end{theorem}
+\begin{proposition}
+Если $E\subset X$ --- гладкая гиперповерхность, то $E$ определяет
+голоморфное линейное расслоение $L_E$
+\end{proposition}
+\begin{proof}
+    $U,V\subset X$ --- откр. мн-ва, $U\cap V\neq 0$.
+Пусть $E\cap U=\{f_U=0\}$, $E\cap V=\{f_V=0\}$.
+
+Тогда
+\[
+\psi_{UV}\coloneqq \frac{f_U}{f_V}
+\]
+--- нигде не нулевая голоморфная функция на $U\cap V$.
+Функция
+\[
+\psi_{UV}\,\psi_{VW}\,\psi_{WU}=1 .
+\]
+удовлетворяет условию кокцикла $\Rightarrow$ определено голоморное линейное расслоение $L_E$.
+А функции $f_U = \psi_{UV}f_V$ и $\{f_U\}$ задают сечения расслоения.
+\end{proof}
+
+\begin{definition}
+Пусть у нас есть раздутие $X$ вдоль $Y$.
+$E \colon = \pi^{-1}(Y)$ --- \term[исключительный дивизор]{исключительный дивизор}.
+\end{definition}
+Обозназначим той же буквой $E$ голоморфное линейное расслоение, задаваемое $E$. Тогда $\widehat X_Y$ и $X$ и $\pi \colon \ \widehat X_Y \to X$. Более того, $\pi^{*}K_{X}$ и $K_{\widetilde X_Y}$ на $\widetilde X_y$. Как они связаны? 
+\[
+E^{\otimes m} = mE,\qquad m\in\mathbb{Z}.
+\]
+\begin{proposition}
+\[
+K_{\widehat X_Y} \cong \pi^{*}K_X + (k-1)E,
+\]
+где $k=\operatorname{codim}Y$.
+\end{proposition}
+
+\newpage
+
+\section{Лекция 9}
+\subsection{Пучки}
+Как и обычно считаем $X$ --- гладким комплексным многообразием. 
+\begin{definition}
+    \term[предпучок]{Предпучком абелевых групп} (колец) $\mathcal F$ называется следующий набор:
+    \begin{enumerate}
+        \item Для любого открытого множества $U \subset X$ $\mathcal{F}(U)$ --- это абелева группа (кольцо). $\mathcal F(\varnothing) = 0$. Элементы $\mathcal{F}(U)$ называются \term[сечения пучка $\mathcal F$ над $U$]{сечениями пучка $\mathcal F$ над $U$}.
+        \item Для любых $V\subset U$ есть отображение ограничения $r_{UV} \colon ~\mathcal{F}(U) \to \mathcal{F}(V)$, причем если $W\subset V \subset U$, то
+        \[r_{UW} =r_{VW} \circ r_{UV},\]
+        и $r_{UV}$ --- гомоморфизм абелевых групп (колец). 
+    \end{enumerate}
+Если $s\in\mathcal{F}(U)$ то часть будем использовать обозначение $s|_V=r_{UV}$.
+\end{definition}
+
+\begin{definition}
+    Предпучок $\mathcal F$ является \term[пучкок]{пучком}, если также выполнены условия
+    \begin{enumerate}
+        \item Если $U= \bigcup\limits_\alpha U_\alpha$ и заданы $s_\alpha \in \mathcal{F}(U_\alpha)$, такие что если они совпадают на пересечении $s_\alpha\big|_{U_\alpha\cap U_\beta} = s_\beta\big|_{U_\alpha\cap U_\beta}$, то существует сечение на глобальном множестве $s\in \mathcal{F}(U)$, такое что $s\big|_{U_\alpha}=s_\alpha$
+
+        \item Если $s_1,s_2\in F(U)$ и $s_1\big|_U\alpha=s_2\big|_U\alpha$, то $s_1=s_2$.
+    \end{enumerate}
+\end{definition}
+\begin{example}
+    \textit{Локально постоянные пучки}, сечениями которых являются локально постоянные функции в $\mathbb Z_X$, $\mathbb Q_X$, $\mathbb{R}_X$ и $\mathbb{C}_X$.
+\end{example}
+\begin{example}
+    $\mathcal C_X^\infty$ --- пучок гладких функций, можно также вести и $C_X^*$ --- пучок гладких функций, не обращающихся в 0. 
+
+    Как и $\mathcal{A}_X^p$ --- пучки гладких $p$ форм.
+\end{example}
+
+\begin{example}
+Теперь рассмотрим примеры пучков, связанных с комплексной структурой.
+\begin{enumerate}
+        \item[] $\mathcal O_X$ --- пучок голоморных функций и $\mathcal O_X^*$ --- пучок голоморных функционалов, которые нигде не обращаются в ноль. 
+
+        \item[ ] $J_V$ --- пучок голоморфных функций на $V$, где $V$ --- аналитическое множество.
+
+        \item[ ] $\mathcal{M}_X^*$ --- пучок ненулевых мероморфных функций.
+
+        \item[ ] $\Omega_X^p$ --- пучок голоморных $(p,0)$-форм; 
+    
+        \item[ ] $\mathcal{A}_X^{p,q}$ --- пучок $(p,q)$-форм;
+
+        \item[ ] Если $E\to X$ --- голоморное векторное расслоения, то $\mathcal O (E)$ --- пучок голоморфных сечений расслоения $E$.
+\end{enumerate}
+\end{example}
+
+\begin{definition}
+    Пусть $\mathcal R$ --- пучок колец на мнгообразии $X$ (не обязательно комплексном), тогда $\mathcal A$ ---\term[пучок модулей над $\mathcal R$]{пучок модулей над $\mathcal R$}, если $\mathcal A$ --- пучок и  для любого $U \subset X$ $\mathcal A(U)$ обладает структурой модуля над $\mathcal R(U)$ и гомомрфизмы ограничений являются гомоморфизмами модулей.
+\end{definition}
+
+
+\begin{definition}
+Пусть $\mathcal F$, $\mathcal G$ --- пучки, а $\varphi \colon \mathcal F \to \mathcal G$ --- \term[отображение пучков]{отображение пучков}, если
+\begin{enumerate}
+    \item Для любого $X\subset X$ $\varphi_U \colon \mathcal F(U) \to \mathcal G(U) $ --- гомоморфизм
+    \item Следующая диаграмма коммутирует.
+\begin{center}
+\begin{tikzcd}[row sep=large, column sep=large]
+\mathcal F(U) \arrow[r, "\rho_{UV}"] \arrow[d, "\psi_U"'] & \mathcal F(V) \arrow[d, "\psi_V"] \\
+\mathcal G(U) \arrow[r, "t_{UV}"] & \mathcal G(V)
+\end{tikzcd}
+\end{center}
+\end{enumerate}
+\end{definition}
+
+\begin{definition}
+ $\mathcal A$ --- пучок модулей над $ \mathcal R$, где $R$ --- пучок колец. $\mathcal A$ называется \term[локально свободный пучок]{локально свободным}, если существует $n>0$ и открытое покрытие $U=\{U_\alpha\}$ такие, что $\mathcal A(U_\alpha)= \mathcal R(U_\alpha)^n$ для всех $\alpha$.
+\end{definition}
+
+\begin{proposition}
+    Пусть $\mathcal A$ --- свободный пучок над $\mathcal R$, где $\mathcal R = \mathcal C_X^\infty$. Тогда существует векторное расслоение $E \to X$ (гладкое или голоморфное), такое что $\mathcal A$ --- пучок сечений $E$.
+\end{proposition}
+\begin{proof}
+    Рассмотрим $\{U_\alpha\}$ покрытие $X$, $\tau_\alpha \colon \mathcal A(U_\alpha) \to \mathcal R^n$. Тогда на $U_\alpha \cap U_\beta$ $\varphi _{\alpha\beta} = \tau_\beta \circ \tau _\alpha ^{-1}$
+\end{proof}
+
+\begin{definition}
+    Пусть $\mathcal F$ --- пучок, $x \in X$, тогда \term[слой пучка]{слой пучка} 
+\[
+F_x \colon = \varinjlim_{x\in U} \mathcal F(U).
+\]
+\end{definition}
+Напомним, что прямой предел это 
+\[
+\varinjlim_{x\in U} \mathcal F(U) =\bigsqcup_{U\ni x} \mathcal  F(U)\big/\!\sim.
+\]
+где  $s_i\in \mathcal F(U_i)\ (i=1,2)$, $s_1\sim s_2$, если $\exists V\subset U_i$, что $s_1\big|_V = s_2\big|_V$.
+
+С помощью этого определения можно объяснить понятие того, что такое инъективность и сюрьективность, если речь идет об отобрпжении пучков.
+
+\begin{definition}
+Пусть $\varphi \colon \mathcal F\to \mathcal G$ --- морфизм пучков на $X$.
+Говорят, что $\varphi$ \term[инъективное отображение пучков]{инъективен} (соответственно, \term[сюрьективное отображение пучков]{сюръективен}), если для каждого $x\in X$
+индуцированный морфизм на слое $\varphi_x \colon \mathcal F_x\to \mathcal G_x$ инъективен (соответственно, сюръективен).
+\end{definition}
+
+
+\begin{proposition}
+Пусть $\varphi \colon F\to G$ --- морфизм пучков на $X$. Для каждого открытого $U\subset X$ положим
+\begin{enumerate}
+\item $(\ker\varphi (U):=\ker\big(\varphi_U \colon F(U)\to G(U)\big).$
+Тогда отображение $U\mapsto(\ker\varphi)(U)$ с ограничениями из $F$ определяет пучок (подпучок $F$), который обозначим $\ker\varphi$.
+\item $\ker\varphi=0\ \Longleftrightarrow\ \varphi\ \text{инъективен (т.е.}\ \forall x\in X \colon \ \varphi_x \colon F_x\to G_x\ \text{инъективен).}$
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+    
+\end{proof}
+Если $g_\alpha\in\operatorname{Im}\big(\varphi_{U_\alpha}\!: \mathcal F(U_\alpha)\to \mathcal G(U_\alpha)\big)$ и $g_\alpha=g_\beta$ на $U_\alpha\cap U_\beta$, то существует $g\in \mathcal G(U)$ такое, что $g|_{U_\alpha}=g_\alpha$ для всех $\alpha$. Но $g$ может не лежать в образе $\varphi_U\!:F(U)\to G(U)$.
+
+т.е. образ экспоненционного отображения пучком не вляется. 
+\begin{example}
+    $X=\mathbb{C}$, $\ \mathcal{O}_X \xrightarrow{\exp(2\pi i\,\cdot)} \mathcal{O}_X^*$, $\,f\mapsto \exp(2\pi i f)=F$. Локально: если $F\in \mathcal{O}_{\mathbb{C}}^*(D)$, то $f=\log F$ определён локально. Но на $\mathbb{C}^*$ функция $F(z)=z$ не может быть глобально вида $e^{2\pi i f}$ (допустим, запишем $z=e^{2\pi i f}$).
+\end{example}
+
+слудеющее утверждение в нашем курсе будет дано без доказательства.
+\begin{proposition}
+    Если $\varphi \colon \mathcal F\to \mathcal G$ --- морфизм пучков, то ассоциированный пучок $\operatorname{Im}\{\varphi \colon F\to G\big\}$ существует и совпадает с $\mathcal G$ тогда и только тогда когда $\varphi$ сюрьективно
+\end{proposition}
+
+\begin{definition}
+Последовательность
+\[
+\cdots \longrightarrow \mathcal F_i \xrightarrow{\varphi_i}
+\mathcal F_{i+1} \xrightarrow{\varphi_{i+1}}
+\mathcal F_{i+2} \longrightarrow \cdots
+\]
+называется \term[точная последовательность]{точной}, если $\ker\varphi_{i+1}=\operatorname{Im}\varphi_i$.
+\end{definition}
+
+Вот есколько примеров точных последовательностей
+\begin{example}
+\begin{enumerate}
+    \item   $V\subset X$ --- аналитическое подмножество; Имеем точную последовательность пучков
+\[
+0\longrightarrow \mathcal J_V \longrightarrow \mathcal O_X \longrightarrow \mathcal O_V \longrightarrow 0,
+\]
+где $\mathcal O_V$ --- структурный пучок $V$, продолженный нулём с $V$ на $X$.
+
+\item Для комплексного $X$ и $p\geq 0$ --- точная последовательность 
+\[
+0\longrightarrow \Omega_X^p \longrightarrow \mathcal A_X^{p,0}
+\xrightarrow{\bar\partial} \mathcal A_X^{p,1}
+\xrightarrow{\bar\partial} \mathcal A_X^{p,2}
+\xrightarrow{\bar\partial}\cdots,
+\]
+где $\Omega_X^p$ --- пучок голоморфных $p$-форм, $\mathcal A_X^{p,q}$ --- пучок гладких $(p,q)$-форм.
+
+\item \[\quad 0\longrightarrow \mathbb{Z}_X \longrightarrow \mathcal{O}_X
+\xrightarrow{\ \exp(2\pi i\,\cdot)\ } \mathcal{O}_X^{\times}
+\longrightarrow 0 \]
+\end{enumerate}
+\end{example}
+
+\subsection{Когомологии}
+Пусть $X$ --- многообразие, $\mathcal F$ --- пучок, $\underline{U} = \{U_\alpha\}$ --- покрытие.
+
+\begin{definition}
+Пусть $\underline{U}=\{U_i\}_{i\in I}$ --- открытое покрытие пространства $X$, а $F$ --- предшеф/пучок на $X$.
+Определим $p$-коцепи:
+\[
+C^{p}(\underline{U},F)\;=\;\prod_{i_0<\cdots<i_p} F\!\big(U_{i_0}\cap\cdots\cap U_{i_p}\big).
+\]
+Кограничный оператор
+\[
+\delta \colon \ C^{p-1}(\underline{U},F)\longrightarrow C^{p}(\underline{U},F)
+\]
+задаётся для $\sigma\in C^{p-1}(\underline{U},F)$ формулой
+\[
+(\delta\sigma)_{U_{i_0}\dots U_{i_p}}
+=\sum_{j=0}^{p}(-1)^j\,
+\sigma_{U_{i_0}\dots \widehat{U_{i_j}}\dots U_{i_p}}
+\Big|_{\,U_{i_0}\cap\cdots\cap U_{i_p}},
+\]
+где знак $\ \widehat{\phantom{U_{i_j}}}$ как обычно означает опущенный множитель, а $\sigma_{U_{i_0}\dots U_{i_{p-1}}}\in \mathcal F\big(U_{i_0}\cap\cdots\cap U_{i_{p-1}}\big)$.
+\end{definition}
+
+\begin{definition}\label{def:cohomologyX}
+    \term[Когомологии]{Когомологии} определяются как
+\[
+H^{\,p}(\underline{U},F)
+=\frac{\ker\!\big(\delta \colon C^{p}(\underline{U},F)\to C^{p+1}(\underline{U},F)\big)}
+       {\operatorname{Im}\!\big(\delta \colon C^{p-1}(\underline{U},F)\to C^{p}(\underline{U},F)\big)}.
+\]
+\end{definition}
+
+Пусть $\underline{U},\underline{V}$ - два покрытия $X$, 
+$\underline{V}=\{V_\beta\}_{\beta\in B}$ и $\underline{U}=\{U_\alpha\}_{\alpha\in A}$.
+Говорят, что $\underline{V}$ \emph{вписано} в $\underline{U}$, если существует отображение
+$\varphi \colon A\to B$ такое, что для всех $\alpha\in A$ выполняется
+\[
+V_{\varphi(\alpha)}\subset U_\alpha .
+\]
+
+\begin{definition}
+Тогда \term[когомологии многообразия]{когомологии всего многообразия}
+     \[H^p(X,F)=\varinjlim_{\underline{U}} H^p(\underline{U},F).\]
+\end{definition}
+
+Рассмотрим точную последовательность пучков
+\begin{equation}\label{eq:shortseq}
+0\longrightarrow \mathcal F \longrightarrow \mathcal G \longrightarrow \mathcal H \longrightarrow 0 
+\end{equation}
+
+\begin{proposition}
+Точная последовательность \eqref{eq:shortseq} индуцирует длинную точную последовательность в когомологиях
+\begin{multline*}
+0\to H^0(X,\mathcal F)\to H^0(X,\mathcal G)\to H^0(X,\mathcal H)\xrightarrow{\delta^{*}}\\
+H^1(X,\mathcal F)\to H^1(X,\mathcal G)\to H^1(X,\mathcal H)\xrightarrow{\delta^{*}}H^2(X,\mathcal F)\to\\\cdots\to
+H^{p}(X,\mathcal F)\to H^{p}(X,\mathcal G)\to H^{p}(X,\mathcal H)\xrightarrow{\delta^{*}}H^{p+1}(X,\mathcal F)\to\cdots
+\end{multline*}
+\end{proposition}
+
+
+\section{Лекция 10}
+Это будет заключительная лекция по пучкам в которой мы докажем важную теорему Дальбо. 
+
+Но сначала дадим слудеющее определение.
+\begin{definition}
+    Пучок колец $\mathcal F$ называется \term[тонкий пучок]{тонким}, если существует покрытие $\underline{U} = \{U_\alpha\}$ и сечения $f_\alpha\in\mathcal F(U_\alpha)$, такое что $\sum_\alpha f_\alpha \equiv 1$
+\end{definition}
+Основной пример тонкого пучка --- это кольцо диференцируемых функций на гладком многообразии.  
+
+Тнкие пучки хорши тем, что имеют нулевые когомологии, что будет  сформулированно немного позже. 
+
+Но отвлечёмся пока от них и рассмотрим общий случай. Рассмотрим группу $H^p(X,\mathcal F)$, определённую в \hyperref[def:cohomologyX]{определении~\ref{def:cohomologyX}}. Поймём, что такое $H^0(X,\mathcal F)$.
+
+Как обычно покрытие $\underline{U} = \{U_\alpha\}$ --- покрытие $X$. Тогда элемент $C^0(\underline{U},\mathcal F)$ задается так: на каждом $U_\alpha$ есть $\sigma_\alpha$. $\sigma$ --- цикл, если на $U_\alpha\cap U_\beta$ $\sigma_\alpha - \sigma_\beta = 0$. Т.е. $H^{0}(X,\mathcal{F})=\{\text{глобальные сечения }\mathcal{F}\}$. 
+
+\begin{proposition}
+    Если $\mathcal F$ --- тонкий, то $H^q(X,\mathcal F) =0$ при $q\geq 0$.
+\end{proposition}
+\begin{proof}
+    Доказательсво данного утверждения в силу своей громоздкости бцдет проведено только для $q=1$. 
+
+
+    Пусть $\underline{U} = \{U_\alpha\}$ --- покрытие $X$, а $f_\alpha$ --- соответствующее разбиение единицы.
+
+    Пусть $\sigma \in C^1(\underline{U},\mathcal F)$. $\delta \sigma =0$ эквивалентно тому, что $\sigma_{\alpha\beta}+\sigma_{\beta\gamma}+\sigma_{\gamma\alpha}=0$  на $ U_\alpha\cap U_\beta\cap U_\gamma.$ Определим
+    \[\tau_\alpha = \sum f_\eta \sigma_{\eta\alpha},\]
+а также заметим, что $\sigma_{\alpha\beta} = -\sigma_{\beta\alpha}$, тогда
+\[
+(\delta\tau)_{\alpha\beta}=\tau_\alpha-\tau_\beta
+=\sum_{\eta} f_{\eta}\bigl(\sigma_{\eta\alpha}-\sigma_{\eta\beta}\bigr)
+=-\sum_{\eta} f_{\eta}\bigl(\sigma_{\alpha\eta}+\sigma_{\eta\beta}\bigr)
+\equiv \sum_{\eta} f_{\eta}\,\sigma_{\beta\alpha}
+=\sigma_{\beta\alpha}.
+\]
+\end{proof}
+
+\subsection{Теорема Дольбо}\label{subsec:dolbeault}
+Теперь $X$ --- комплексное многообразие, $E\to X$ --- голоморное векторное расслоение, а $\mathcal A ^{q}(E)$ --- $(0,q)$ формы в $E$. Рассмотрим точную последовательность 
+\[0 \to \mathcal{O}(E) \to A^{0}(E) \xrightarrow{\overline{\partial}} A^{1}(E) \xrightarrow{\overline{\partial}} A^{2}(E) \to \cdots\]
+Она точная по \hyperref[th:dbar-poincare]{лемме Пуанкаре}
+\[
+0 \to \mathcal{O}(E) \hookrightarrow A^{0}(E) \xrightarrow{\bar\partial} \bar\partial A^{0}(E) \to 0,
+\]
+\[
+0 \to \bar\partial A^{q-1}(E) \hookrightarrow A^{q}(E) \xrightarrow{\bar\partial} \bar\partial A^{q}(E) \to 0 .
+\]
+
+
+\[
+0 \longrightarrow \mathcal F \longrightarrow \mathcal G \longrightarrow \mathcal H \longrightarrow 0
+\]
+
+% длинная точная последовательность когомологий
+\begin{multline}
+0 \longrightarrow H^0(X,\mathcal F) \longrightarrow H^0(X,\mathcal G) \longrightarrow H^0(X,\mathcal H)
+\longrightarrow\\ H^1(X,\mathcal F) \longrightarrow H^1(X,\mathcal G) \longrightarrow H^1(X,\mathcal H)
+\xrightarrow{\delta} H^2(X,\mathcal F) \longrightarrow \cdots\\
+\cdots \longrightarrow H^q(X,\mathcal F) \longrightarrow H^q(X,\mathcal G) \longrightarrow H^q(X,\mathcal H)
+\xrightarrow{\delta} H^{q+1}(X,\mathcal F) \longrightarrow \cdots
+\end{multline}
+
+
+Также заметим что $H^q(X, \mathcal{F}^p(E)) = 0,$ $q \geq 1.$ и $H^q(X, \mathcal{O}(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)), \quad q \geq 2.$
+
+А также 
+\[0 \leftarrow H^1(X, \partial(E)) \leftarrow H^0(X, \overline{\partial} \mathcal{A}^0(E)) 
+\xleftarrow{\ \overline{\partial} \ } H^0(X, \mathcal{A}(E)) 
+\leftarrow H^0(X, \partial(E)) \leftarrow 0.\]
+
+\[H^1(X, \mathcal O(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^0(E))}{\overline{\partial} H^0(X, \mathcal{A}^0(E))}.
+\]
+
+а также комбинирую две точные последовательности получаем, что 
+\[H^q(X, \partial(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)) 
+\cong H^1(X, \overline{\partial} \mathcal{A}^{q-1}(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))}{\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))}
+\]
+где последнее это 
+\[H_{\overline{\partial}}^q(X, E) \cong 
+\frac{\ker\left(\overline{\partial} \colon \mathcal{A}^q(E) \to \mathcal{A}^{q+1}(E)\right)}
+{\operatorname{Im}\left(\overline{\partial} \colon \mathcal{A}^{q-1}(E) \to \mathcal{A}^q(E)\right)}
+\]
+Так как $H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))$ --- это замкнутые $(0, q)$-формы со значениями в $E$, а 
+$\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))$ --- точные формы,
+
+\begin{theorem}[Дальбо]
+Пусть $X$ --- комплексное многообразие, $E \to X$ --- голоморфное векторное расслоение. Тогда
+\[
+H^q(X, \partial(E)) \cong 
+\frac{
+\ker\left( \overline{\partial} \colon \mathcal{A}^q(E) \to \mathcal{A}^{q+1}(E) \right)
+}{
+\operatorname{Im}\left( \overline{\partial} \colon \mathcal{A}^{q-1}(E) \to \mathcal{A}^q(E) \right)
+}.
+\]
+\end{theorem}
+
+\begin{corollary}
+Пусть $E = \mathbb{C}$, $\Omega_X^p$ пучок голоморфных $p$-форм. Тогда
+\[
+H^q(X, \Omega_X^p) = H^{p,q}_{\overline{\partial}}(X) =
+\frac{
+\ker\left( \overline{\partial} \colon \Lambda^{p,q} \to \Lambda^{p,q+1} \right)
+}{
+\operatorname{Im}\left( \overline{\partial} \colon \Lambda^{p,q-1} \to \Lambda^{p,q} \right)
+}.
+\]
+\end{corollary}
+
+Часто используют обозначение:
+\[
+H^q(X, E) := H^q(X, \mathcal O (E)).
+\]
+\begin{proposition}
+Пусть $Y \subset \mathbb{C}^n$ --- гиперповерхность. Тогда $Y$ является множеством нулей голоморфной функции.
+\end{proposition}
+\begin{proof}
+    Пусть $\underline{U}$ --- покрытие $\mathbb{C}^n$ и  $U_\alpha \cap Y = \{ f_\alpha = 0 \}, $ и на ${U}_\alpha \cap {U}_\beta \quad \frac{f_\alpha}{f_\beta} \in \mathcal{O}^*({U}_\alpha \cap {U}_\beta).$
+
+Пусть $\psi_{\alpha\beta} = \frac{f_\alpha}{f_\beta}$. Ясно, что $\psi_{\alpha\beta}\psi_{\beta\gamma}\psi_{\gamma\alpha}=1$. рассмотрим точную последловательность пучков
+\[0 \longrightarrow \mathbb{Z} \longrightarrow \mathcal{O}_{\mathbb{C}^n} 
+\overset{\exp(2\pi i\, \cdot)}{\longrightarrow} \mathcal{O}_{\mathbb{C}^n}^* \longrightarrow 0\]
+
+$\mathbb Z$ --- постоянный пучок, а у $\mathcal{O}_{\mathbb{C}^n}$ нет когомологий, отсюда 
+\[H^q(\mathbb{C}^n, \mathcal{O}_{\mathbb{C}^n}^*) \cong H^{q+1}(\mathbb{C}^n, \mathbb{Z}) \cong 0.
+\]  
+Значит $\psi_{\alpha\beta} = \frac{g_\alpha}{g_\beta}$, где $g_\alpha$ и $g_\beta$ --- ненулевыйе голоморфные функции.
+
+\[\frac{f_\alpha}{f_\beta} = \frac{g_\alpha}{g_\beta},
+\quad \Longrightarrow \quad
+\frac{f_\alpha}{g_\alpha} = \frac{f_\beta}{g_\beta}.
+\]
+И т.к. пучок голоморфных фцнуцый то существует глобально определенная голоморфнвя функция $\hat f|_{{U}_\alpha \cap {U}_\beta} = \frac{f_\alpha}{g_\alpha}$.
+\end{proof}
+\subsection{Дивизоры}
+Пусть тееперь $X$ --- произвольное комплексное многообразие.
+
+Если $Y \subset X$ --- гиперповерхность, то $Y =\cup_i Y_i$, где $Y_i$ -- непрерывная.
+\begin{definition}
+Формальная линейная комбинация 
+\[
+D = \sum a_i Y_i, \quad a_i \in \mathbb{Z},
+\]
+где $Y_i$ --- непрерывные, называется \term[дивизор]{дивизором}.
+\end{definition}
+
+$Y$ --- непрерывная гиперповерхность локально возле нуля задаваесая как $Y =\{g=0\}$ в $X$, $f$ --- мероморфная функцция, тогда для $x\in Y$ иожно определить $\operatorname{ord}_{x,Y}(f)\in \mathbb Z$, такое что $f = g^{\operatorname{ord}_{x,Y}(f)} \cdot h$, $h \in \mathcal{O}_{x,X}$, $Y =\{g=0\}$, а $h$ --- обратима. Если $Y$ неприводим, то $\operatorname{ord}_{Y}(f) = \operatorname{ord}_{x,Y}(f)$ $\forall x\in Y$ 
+
+\begin{definition}
+Дивизор мероморфной функции $f$ определяется как
+\[
+(f) := \sum \operatorname{ord}_Y(f) \cdot Y,
+\]
+дивизор мероморфной функции называется \term[главный дивизор]{главным}.
+\end{definition}
+
+Дивизоры, как формальную сумму можно склыдвать, такая группа обозначается $\operatorname{Div}(X)$.
+
+Заметим, что всякая гиперповерхность задана лин 
+Локально $Y\cap U_\alpha = \{f_\alpha=0\}$, где $\underline{U} = \{U_\alpha\}$ --- покрытие $X$. $\frac{f_\alpha}{f_\beta} = \psi_{\alpha\beta} \in \mathcal{O}^*({U}_\alpha \cap {U}_\beta)$ --- коцикл, следовательно он лежит в группе $H^1(X,\mathcal O^*_X)$. С другой стороны, любой такой коцикл из $H^1(X,\mathcal O^*_X)$ по определениею задает голоморфное линейное расслоение. Более того у такого расслоения сразу имеется сечение, задаваемое $f_\alpha$.
+
+$H^1(X,\mathcal O^*_X)$ --- это группа, образованная голоморными линейными расслоениями, часто она обозначается $\operatorname{Pic}(X)$.
+
+Отображение из $\operatorname{Div}(X)$ в $\operatorname{Pic}(X)$ --- гомоморфизм.
+
+Т.е. резюмирая все вышесказанное 
+\begin{proposition}
+\begin{enumerate}
+    \item Отображение $\operatorname{Div}(X) \to \operatorname{Pic}(X)$ является гомоморфизмом.
+    \item Образ $\operatorname{Div}(X) \to \operatorname{Pic}(X)$ содержит расслоения $L\subset H^0(X,L)$, т.е. имеющими непрерывные сечения.
+\item Если $s_i \in H^0(X,L_i)$, $i=1,2$ то $s_i$ соответствуют дивизоры $D_i = {s_i = 0}$, причем $D_i$ отображаются в $L_i$ при отображениии $\operatorname{Div}(X) \to \operatorname{Pic}(X)$
+\item Образ $\operatorname{Div}(X) \to \operatorname{Pic}(X)$ порожден расслоениями $H^0(X,L) \neq 0$.
+\end{enumerate}
+\end{proposition}
+
+
+
+\newpage
+\section{Лекция 11}
+Уже по традиции $X$ --- комплексное многообразие, вспомним что на прошлой лекции мы определили группу дивизоров $\operatorname{Div}(X)$ и обсудили связь с группой голоморфных линейных расслоений $H^1(X,\mathcal O_X^*)$.
+
+Рассмотрим две точные последовательности
+\[
+0 \longrightarrow \mathbb{Z} \longrightarrow \mathcal{O}_X 
+\overset{\exp}{\longrightarrow} \mathcal{O}_X^* \longrightarrow 0,
+\]
+\[
+0 \longrightarrow \mathcal{O}_X^* \longrightarrow \mathcal{M}_X^* 
+\longrightarrow \mathcal{M}_X^* / \mathcal{O}_X^* \longrightarrow 0,
+\]
+где напомним, что $\mathcal M_X^*$ --- пучок мероморфных функций.
+
+Первое граничное отображение из $H^1(X,\mathcal O_X^*) \to  H^2(X,\mathbb Z)$
+\begin{remark}
+    Отоборажение $H^1(X,\mathcal O_X^*) \to  H^2(X,\mathbb Z)$ есть ни что иное как сопостевление голоморфному линейному расслоениею его первый класс Черна. $L \mapsto C_1(L)$
+\end{remark}
+
+Второе отображение $H^0(X, \mathcal{M}_X^* / \mathcal{O}_X^*) \longrightarrow H^1(X, \mathcal{O}_X^*)
+$ есть тоже самое, что и отображение $\operatorname{Div}(X) \to H^1(X,\mathcal O_X^*)$. Действительно, рассмотрим утверждение
+\begin{proposition}
+    Пусть $X$ --- гладкое комплексное многообразие, тогда $\operatorname{Div}(X) \cong H^0(X,\mathcal{M}_X^* / \mathcal{O}_X^*))$.
+\end{proposition}
+\begin{proof}
+    Рассмотрим функцию $f \in H^0(X,M^*_X/\mathcal O_X^*)$ и покрытие $\underline{U} = \{U_\alpha\}$ $f_j$ --- мероморфные функции неа $U_\alpha$. На $U_\alpha \cap U_\beta$ $f_\alpha/f_\beta = \mathcal O_X^*(U_\alpha\cap U_\beta)$. Каждому $f$ локально сопоставляется дивизор, т.е. 
+    \[f_\alpha \mapsto \operatorname{Div}(f_\alpha) = \sum a_i Y_i\].
+
+    В обратную сторону, пусть $D\in \operatorname{Div}(X)$, 
+    \[D=\sum a_i Y_i,\]
+    где $Y_i$ неприводимые. Пусть $f_{\alpha i}$ --- локальное уравнение для $Y_i\cap U_\alpha$, тогда определим 
+    \[f_\alpha = \prod_j f_{\alpha i}^{a_i}.\]
+Тогда видно, что $\{f_\alpha\}$ опрееделяет элемент в $H^0(X, \mathcal M_X^*/\mathcal O_X^*)$
+\end{proof}
+
+Далее, в прошлый раз мы говорили, что если
+\[D = \sum a_i Y_i, \qquad a_i \geq 0\] 
+- дивизор, то ему сопоставляется линейное расслоение $\mathcal O(D)$. Локально $D$ задано одним уравнением $D\cap U_\alpha = \{f_\alpha =0\}$. Тогда отношение локальрных уравнений $f_\alpha/f_\beta = g_{\alpha\beta} \in H^1 (X,\mathcal O_X^*)$. $g_{\alpha\beta}$ --- склеивающий коцикл некоторого линейного расслоения $f_\alpha = g_{\alpha\beta}f_\beta$ следовательно $f_\alpha$ задает сечение.
+
+Пусть $f$ --- мероморфная функуия, тогда $D(F)$ --- сопоставленный ей дивизор. Заметим, что $_\alpha/f_\beta=1$, тогда дивизор мероморфной функции задает тривиальное расслоение. Такое расслоение называется главным. 
+
+Пусть $L\to X$ --- голоморфное линейное расслоение, $H^0(X,L)\neq 0$, т.е. $s$ - голоморфное сечение, рассмотрим $Z_s =\{x\in X|s(x) =0\}$ - это аналитическая гиперповерхность, т.е. двизор. Потому есть отображение $Z_s \to \mathcal O (Z_s)$
+
+
+\begin{proposition}
+	$\mathcal O(Z_s)\cong L$
+\end{proposition}	
+\begin{proof}
+	$s_\alpha = s|_{U_\alpha}$ и $s_\alpha=g_{}\alpha\beta s_\beta$ на $U_\alpha\cap U_\beta$? где $g_{\alpha\beta}$ --- склеивающий коцикл для $L$. Тогда $s_\alpha/s_\beta = g_{\alpha\beta}$.
+\end{proof}
+
+Образ
+\[\operatorname{Div}(X) \longrightarrow \operatorname{Pic}(X) = H^1(X, \mathcal{O}_X^*)
+\]
+порождается голоморфными линейными расслоениями с $H^0(X,L) \neq 0$.
+\begin{remark}
+	Это отображение может быть не сюрьективным.
+\end{remark}
+
+\subsection{Метрики, связности и кривизна}
+Рассмотрим комплексное  векторное расслоение $E \to X$ (не обяхзательно голоморфное.) Любое сечение имеет следующие свойства:
+\begin{enumerate}
+	\item На $E$ всегда существует эрмитова метрика $H$
+	Если $(e_1, \ldots, e_r)$ --- локальное тривиализующее сечение, то
+	\[
+	H_{\alpha\bar{\beta}} = H(e_\alpha, e_{\bar{\beta}}), \quad \alpha, \beta = 1, \quad r = \operatorname{rk} E.
+	\]
+	H --- это сечение $E^* \otimes \overline{E}^*$
+	\item На $E$ всегда существует связность, т.е. отображение 
+	\[D \colon \Gamma(E) \to \Gamma(E \otimes \Lambda^1),\]
+	такое что
+	\begin{enumerate}
+		\item[a)] $D(s_1 + s_2) = Ds_1 + Ds_2$
+		\item[б)] $D(fs) = df \otimes s + f Ds$
+	\end{enumerate}
+\item Локально ковариантная производная имеет вид:
+\[
+D = d + A,
+\]
+где $A$ --- матричнозначная 1-форма $De_\alpha = A_\alpha^{\ \beta} \, e_\beta$ (тензором она не является).
+\end{enumerate}
+Заметим, что \textbf{априори связи между $D$ и $H$ нету}
+
+Заметим, что если мы продолжим $D$ на
+\[D \colon \Gamma(E \otimes \Lambda^p_X) \longrightarrow \Gamma(E \otimes \Lambda^{p+1}_X)
+\]
+по формуле
+\[D(h \otimes s) = dh \otimes s + h \cdot Ds.
+\]
+
+\begin{proposition}
+Пусть $s \in \Gamma(E)$. Тогда справедливо равенство
+\[
+D^2 s = F_A \wedge s,
+\]
+где
+\[
+F_A = dA + A \wedge A \in \operatorname{End}(E) \otimes \Lambda^2_X
+\]
+\end{proposition}
+
+Если есть $D$ на $E$, то $D$ задает связность на тензорных степенях (прямых суммах и $E^*$) $E$. 
+
+Т.к. раасслоение у нас комплексное, то рассмотрим $\overline E$, связность на нем определяется по формуле 
+\[
+\overline{D} s = D s.
+\]
+
+Связность $D$ называется согласованной с $H$, если $DH-0$, ну или эквивалентно, $DH(s_1,s_2) = H(Ds_1,s_2) + H(s_1,Ds_2).$
+
+
+
+Пусть $X$ --- комплексное многообраазие, тогда $D$ на комплексном векторном расслоении раскладывается на $(1,0)$- и $(0,1)$-составляющие:
+\[
+D = D' + D'',
+\]
+где
+\[
+D = d + A, \quad D' = \partial + A^{(1,0)}, \quad D'' = \overline{\partial} + A^{(0,1)},
+\]
+и $A^{(1,0)}$, $A^{(0,1)}$ --- компоненты матрицы связности $A$ по типу формы.
+
+Пусть $E$ --- голоморфное векторное расслоение. Тогда оператор $\overline{\partial}$ корректно определён на $\Gamma(E)$.
+
+\textbf{Вопрос:} Существует ли связность $D$ на $E$, такая что:
+\begin{enumerate}
+	\item[а)] $D H = 0$, т.е. $D$ согласована с ней;
+	\item[б)] $D'' = \overline{\partial}$.
+\end{enumerate}
+\textbf{Ответ --- да, причем единственная.}
+
+
+Заметим две вещи:
+\begin{enumerate}
+	\item Метрика $H$ определяет изоморфизм $E \to \overline{E}^*$ --- антиголоморфно. На $\overline{E}^8$ есть оператор $\partial$.
+\end{enumerate}	
+По этому положим для любого сечения $s\in \Gamma(E)$ $D^ns = \bar \partial s$ и $D's = H^{-1}(\partial Hs)$.
+
+нетрудно видеть, что формула лейбница выполняется, пусть  $z^1, \dots z^n$ --- локальные координаты в $X$, $e_1,\dots e_r$ --- голоморфная тривиализация $E$. Пусть 
+\[\partial_j = \frac{\partial}{\partial z^j}, \qquad \partial_{\overline{j}} = \frac{\partial}{\partial \overline{z}^j},\]
+
+$s = s^\alpha e_\alpha$. Тогда 
+\[\partial_{\overline{k}} s^\alpha = D''_{\overline{k}} s^\alpha
+\]
+и
+\[D'_j s^\alpha = \partial_j s^\alpha + H^{\alpha \overline{\gamma}} \partial_j H_{\overline{\gamma} \beta} s^\beta.
+\]
+
+\begin{theorem}\label{def:chern_m}
+	Пусть $E$ --- голоморфное векторное расслоение над комплексным многообразием $X$.
+	
+	Тогда существует единственная связность $D$, такая что:
+	\begin{enumerate}
+		\item $D'' = \overline{\partial}$;
+		\item $D' = \partial + \partial H \cdot H^{-1}$;
+		\item $D$ сохраняет эрмитову метрику $H$, то есть $D H \equiv 0$.
+	\end{enumerate}
+\end{theorem}
+Такая связность называется \term[Связность Черна]{связностью Черна}.
+\begin{proof}
+	Мы доказали все, кроме того, что она сохраняет метрику и единственна.
+	
+	 Продолжим $D$ на $E\otimes \overline E^*$, если $t\in \Gamma(E^*)$, то $D(t(s)) = d(t(s)) - t(Ds)$. Т.к. $Dt = dt - A t
+	 $, то также нетрудно понять, что 
+	 \[D'_j H_{\alpha \overline{\beta}} 
+	 = \partial_j H_{\alpha \overline{\beta}} - A_{j \alpha}^{\ \ \gamma} H_{\gamma \overline{\beta}},
+	 \]
+где $A_{j \alpha}^{\ \ \gamma} = \partial H \cdot H^{-1}$.
+ну и соответственно 
+	 \[D''_{\overline{k}} H_{\alpha \overline{\beta}} = \partial_{\overline{k}} H_{\alpha \overline{\beta}} 
+	 - A_{\overline{k} \, \overline{\beta}}^{\ \ \ \, \overline{\delta}} H_{\alpha \overline{\delta}} = 0\]
+	 потому связность сохраняет метрику.
+	 
+	 
+Единственность следует из того, что формулы для обеих функций будут одинаковые. 
+\end{proof}
+\begin{proof}
+	Пусть $(e_1, \dots, e_r)$ --- локальный тривиальный базис.
+	
+	Наоборот, пусть $D$ --- связность такая, что $D H = 0$ и $D'' = \overline{\partial}$.
+	
+	Тогда:
+	\[
+	dH(e_\alpha, e_{\overline{\beta}}) 
+	= H(D e_\alpha, e_{\overline{\beta}}) + H(e_\alpha, D e_{\overline{\beta}})
+	\]
+	
+	Так как $D = D' + D''$ и $D'' = \overline{\partial}$, то:
+	\[
+	\partial H(e_\alpha, e_{\overline{\beta}}) 
+	= H(D' e_\alpha, e_{\overline{\beta}}) + H(e_\alpha, \overline{\partial} e_{\overline{\beta}})
+	\]
+	
+	Поскольку $e_{\overline{\beta}}$ --- базисное сечение, его производная равна нулю:
+	\[
+	= H(D' e_\alpha, e_{\overline{\beta}})
+	= H(A_\alpha^{\ \gamma} e_\gamma, e_{\overline{\beta}})
+	= A_\alpha^{\ \gamma} H_{\gamma \overline{\beta}}
+	= \partial H_{\alpha \overline{\beta}}
+	\]
+	
+	Отсюда:
+	\[
+	A_\alpha^{\ \gamma} = \partial H_{\alpha \overline{\beta}} \cdot H^{\overline{\beta} \gamma}
+	\quad \Rightarrow \quad
+	A = \partial H \cdot H^{-1}
+	\]
+\end{proof}
+
+Далее для связности Черна будем использовать соглашение 
+\[\nabla \coloneqq D' , \qquad \bar \partial =  D''.\]
+На сопряженных расслоениях, соответственно черта будет на других местах.
+
+ $F$ --- кривизна связности  Черна:
+  
+ Пусть $A = A^{(1,0)} + A^{(0,1)}$. Тогда
+ \begin{multline*}
+ 	F = dA + A \wedge A  
+ 	= \underbrace{\partial A^{(1,0)} + A^{(1,0)} \wedge A^{(1,0)}}_{F^{(2,0)}} \\
+ 	+ \underbrace{
+ 		\overline{\partial} A^{(1,0)} + \partial A^{(0,1)} 
+ 		+ A^{(1,0)} \wedge A^{(0,1)} + A^{(0,1)} \wedge A^{(1,0)}
+ 	}_{F^{(1,1)}} \\
+ 	+ \underbrace{
+ 		\overline{\partial} A^{(0,1)} + A^{(0,1)} \wedge A^{(0,1)}
+ 	}_{F^{(0,2)}}
+ \end{multline*}
+ 
+\[
+F = F^{(2,0)} + F^{(1,1)} + F^{(0,2)},
+\]
+но $F^{(0,2)} = 0$ для связности Черна на $E$. 
+
+Рассмотрим подробнее $F^{(2,0)} = \partial A^{(1,0)} + A^{(1,0)} \wedge A^{(1,0)},$  $ A^{(1,0)} = \partial H \cdot H^{-1}$ а именно
+ \begin{multline*}
+F^{(2,0)} 
+= \partial(\partial H \cdot H^{-1}) + \partial H \cdot H^{-1} \wedge \partial H \cdot H^{-1} \\
+= - \partial H \cdot H^{-1} \wedge \partial H \cdot H^{-1} 
++ \partial H \cdot H^{-1} \wedge \partial H \cdot H^{-1} = 0
+\end{multline*}
+$F^{(1,1)} = \overline{\partial}(\partial H \cdot H^{-1}) = F$
+
+Т.е. мы только что доказали, что 
+\begin{proposition}
+	Кривизна связности Черна на голоморфном векторном расслоении $E$ с эрмитовой метрикой $H$, 
+	имеющей тип $(1,1)$, выражается формулой:
+	\[
+	F = \overline{\partial}(\partial H \cdot H^{-1}).
+	\]
+\end{proposition}
+В локальных координатах 
+\[F = F^{\alpha}_{jk\overline{\beta}} \, dz^j \wedge d\overline{z}^k,
+\]
+где 
+\[F^{\alpha}_{jk\overline{\beta}} = -\partial_j \partial_k H_{\gamma \overline{\beta}} \, H^{\alpha \overline{\gamma}}
++ \partial_j H_{\gamma \overline{\beta}} \, H^{\epsilon \overline{\gamma}} \, \partial_k H_{\epsilon \overline{\delta}} \, H^{\alpha \overline{\delta}}.
+\]
+
+
+\section{Лекция 12}
+
+По классике пусть $X$ --- компактное комплексное многообразие, 
+$E \to X$ --- голоморфное векторное расслоение ранга $r = \operatorname{rk} E$,
+а $H = (H_{\alpha \overline{\beta}})$ --- эрмитова метрика на $E$.
+
+На прошлой лекции нами введена (см. \hyperref[def:chern_m]{теорему о связности Черна}) метрика Черна, а также рассмотрена кривизна, соответствующая ей.
+
+Напомним общий факт, что если есть двойственное расслоение $E^*$, тогда если $t\in \Gamma(E^*)$, а $s \in \Gamma (E)$, то мы можем на $E^*$ ввести связность как
+\[
+(\nabla t)(s) = d(t(s)) - t(\nabla s)
+\]
+Далее если $E_1$ и $E_2$ --- голоморфые векторные расслоения, $\nabla_1$, $\nabla_2$ --- соответствующие связности, то можем определить связность на прямой сумме $E_1 \oplus E_2$ как 
+\[
+\nabla^{E_1 \oplus E_2}(s_1 \oplus s_2) = \nabla^1 s_1 \oplus \nabla^2 s_2, \qquad s = \begin{pmatrix} s_1 \\ s_2 \end{pmatrix}, \quad \nabla^{E_1 \oplus E_2}_{\partial/\partial z}, s = 
+\begin{pmatrix}
+	\nabla^1 s_1 \\
+	\nabla^2s_2
+\end{pmatrix}.
+\]
+На тензорном произведении $E_1 \otimes E_2$ можно задать связность по формуле 
+\[
+\nabla(s_1 \otimes s_2) = \nabla^1 s_1 \otimes s_2 + s_1 \otimes \nabla^2 s_2.
+\]
+Ну и на $\overline E$, если $s\in \Gamma (E)$, то $\overline s \in \Gamma (\overline  E)$ $\nabla \overline{s} \coloneqq \overline{\nabla s}$
+
+
+\begin{proposition}
+	Пусть $(E,H)$ --- голоморфное векторное расслоение над $X$, $x_0 \in X$. Тогда существует $e_1, \dots , e_r$ --- тривиализация $E$ в окрестности $x_0$, такая, что имеет вид 
+	$H(e_\alpha, e_{\bar{\beta}}) = \delta_{\alpha \bar{\beta}},$
+	и выполнено $\partial H(x_0) = 0.$
+\end{proposition}
+\begin{proof}
+	Т.к. всегда мы можем выбрать ОНБ, то считаем, что первое выполнено. Заметим, что если $a \colon ~E\to E$ --- голоморфное преобразование, то метрика преобразуется как $H \mapsto aHa^{-1}$, соответственно 
+	$\partial H = \partial H \cdot H^{-1} \cdot H + H \cdot \partial H \cdot H^{-1}$.
+Откуда видно, что надо найти $a$, такое что 
+\begin{align*}
+	&1)\quad a(x_0) = \mathrm{Id}, 
+	&2)\quad a = \mathrm{Id} + a^i_{\beta} \bar{z}^j,
+\end{align*}
+где
+\[a^i_{\beta} = \partial_j H_{\beta \bar{\delta}} \cdot H^{\bar{\delta} i}(x_0) 
+= - \partial_j H_{\beta \bar{i}}(x_0).\]
+
+Если $\operatorname{rk}E = r$, то на  $\Lambda^r E$ имеется
+\[
+e_1 \wedge \dots \wedge e_r \in \Gamma(\Lambda^r E) 
+\]
+--- локальная тривиализацияе $\Lambda^r E$.
+\[
+\nabla s = \sum_{j=1}^r e_1 \wedge \dots \wedge \nabla e_j \wedge \dots \wedge e_r,
+\]
+где мы знаем что $\nabla e_\alpha = A_\alpha^{\ \beta} e_\beta$. Перепишем сумму выше как 
+\[
+\sum_{\beta,\alpha=1}^r 
+e_1 \wedge \ldots \wedge A_\alpha^{ \beta} e_\beta \wedge \ldots \wedge e_r 
+= 
+\sum_{\alpha=1}^r
+e_1 \wedge \ldots \wedge A_\alpha^{\ \alpha} e_\alpha \wedge \ldots \wedge e_r = \sum_{\alpha=1}^{r} A_\alpha^{\ \alpha} s.
+\]
+заметим, что $A = A_\alpha^{\ \alpha} = H^{\alpha \bar{\beta}} \, \partial H_{\alpha \bar{\beta}} = \partial \log \det H,
+$ где $H = (H_{\alpha, \bar \beta})$ (здесь идёт мнимое суммирование). Тогда кривизна $A$ 
+\[
+F_A = \bar\partial A = \bar\partial\partial \log \det H
+\]
+Более общо, если $L \to X$ голоморфное линейное расслоение, $H$ --- метрика на $L$, то 
+\[
+F = \bar{\partial} \partial \log H
+\]
+
+Если локально взять $H = e^{-\varphi}$, то
+\[
+F = -\bar{\partial} \partial \varphi = \partial \bar{\partial} \varphi
+\]
+\end{proof}
+
+Часто под кривизной $L$ понимают не $\bar{\partial} \partial \log H$ (или $\partial \bar{\partial} \varphi$), а
+\[
+\sqrt{-1}\,\bar{\partial} \partial \log H = \sqrt{-1}\,\partial \bar{\partial} \varphi
+\]
+
+\begin{example}
+Пусть $L\to X$ ---комплексное линейное расслоение на компактном комплексном многообразии $X$, как раньше, но $H^0(X,L)$ и для любого $x_0 \in X$ существует $s\in H^0(X,L)$, такой что $s(x_0)=0.$ усть $X$ --- компактное. Тогда $\dim H^0(X, L) < +\infty.$
+
+Пусть $s_1, \dots, s_k$ --- базис в $H^0(X, L)$, а $s$ --- произвольное сечени. Тогда определим 
+\[H(s, s) = \frac{|s|^2}{\sum\limits_{j=1}^k |s_j|^2}.\]
+В частности, если $X=\mathbb{CP}^n$, $L = \mathcal O(1)$, то 
+\[H_{FS} = 
+\frac{1}{|z_0|^2 + \dots + |z_n|^2},\]
+такая метрика называется \term[Метрика Фубини-Штуди]{метрикой Фубини-Штуди}. Вычислим кривизну 
+\[F_{FS} = -\sqrt{-1} \, \partial \bar{\partial} \log\left( \sum |z_j|^2 \right) = \sqrt{-1} \, \partial \bar{\partial} \log \sum |z_j|^2
+\]
+вообще говоря сумма под логарифмам определена только локально, но сама $F_{FS}$, глобальная.
+\end{example}
+Заметим также, что
+\begin{proposition}
+Если $f$ --- голоморфная функция не имеет нулей в окрестности нуля в $\mathbb{C}^r$, то $\sqrt{-1} \, \partial \bar{\partial} \log |f|^2 = 0$.
+\end{proposition}
+
+$X$ --- комплексное многообразие.
+\[
+0 \longrightarrow S \xlongrightarrow{\iota} E \xlongrightarrow{p} Q \longrightarrow 0,
+\]
+--- точная последовательность голоморфных векторных расслоений. Пусть $H$ --- метрика на $E$.
+
+На каждом пространстве есть связность Черна, поймем как они связаны.
+
+У нас имеется разложение $S^\perp = T,$ $E \simeq S \oplus S^\perp \simeq S \oplus T.$ и $T \simeq Q$. $T$ --- комплексное, однако \textbf{не голоморфное}. Пусть $\pi_s$, $\pi_T$ --- проекторы на $S$ и $T$ соответственно.
+\begin{proposition}
+Пусть $\psi \in \Gamma(S)$. Тогда ковариантная производная $\nabla \psi$ раскладывается как
+\[
+\nabla \psi = \pi_S(\nabla \psi) + \pi_T(\nabla \psi),
+\]
+где:
+\begin{enumerate}
+	\item $\nabla^S$ --- связность Черна на $S$, и тогда
+	\[
+	\pi_S(\nabla \psi) = \nabla^S \psi;
+	\]
+	\item $\pi_T(\nabla \psi) = B \psi$, где $B \in \Gamma(\mathrm{Hom}(S, T) \otimes \Lambda^{1,0}_X)$.
+\end{enumerate}
+а $\nabla$ --- связность Черна на $E$.
+\end{proposition}
+\begin{proof}
+1) Сначала докажем первый пункт. Пусть $f \in C^\infty(X)$. Тогда:
+\[
+\pi_S\left(\nabla(f\psi)\right) 
+= \pi_S\left((\partial f) \otimes \psi + f \nabla \psi\right)
+= (\partial f) \otimes \pi_S(\psi) + f \pi_S(\nabla \psi),
+\]
+то есть
+\[
+\pi_S\left(\nabla(f\psi)\right) = (\partial f) \otimes \psi + f \pi_S(\nabla \psi).
+\]
+
+
+2) \[
+\pi_T\left(\nabla(f\psi)\right)
+= (\partial f) \otimes \pi_T(\psi) + f \pi_T(\nabla \psi)
+= f \pi_T(\nabla \psi),
+\]
+гдн роследнее равенство следует из того, что  $T$-проекция от $\psi$ равна нулю (по предположению в условии).
+Таким образом,
+\[
+\pi_T\left(\nabla(f\psi)\right) = f \pi_T(\nabla \psi).
+\]
+\end{proof}
+
+\begin{proposition}\label{pr:exactchern}
+Пусть $\nabla$ --- связность Черна на векторном расслоении $E$, и $\varphi \in \Gamma(T)$ --- сечение подрасслоения $T$. Тогда выполнены следующие свойства:
+\begin{enumerate}
+	\item $\Pi_T(\nabla \varphi) := \nabla^T \varphi$, где $\nabla^T$ --- некоторая унитарная связность на $T$;
+	\item $\Pi_S(\nabla \varphi) = C \varphi$, где $C$ --- 1 форма со значениями в $\operatorname{Hom}(T,S)$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Аналогично предыдущему.	
+\end{proof}
+\[
+\nabla = 
+\begin{pmatrix}
+	\nabla^S & C \\
+	B & \nabla^T
+\end{pmatrix}
+\]
+
+Более того, если $B = B_j \, d\bar{z}^j$, то $B_j^* = -C_{\bar{j}}$ 
+$\psi \in \Gamma(S)$, $\varphi \in \Gamma(T)$
+
+\[
+0= \partial_j \langle \psi, \varphi \rangle = \langle \nabla_j \psi, \varphi \rangle + \langle \psi, \partial_j \varphi \rangle 
+= \langle B_j \psi, \varphi \rangle + \langle \psi, C_{\bar j} \varphi \rangle
+\]
+
+Веренмся к точной последовательности. Голоморфное отображение $p \colon E \to Q = E / S$ и сопряженное $p^* \colon Q \to E$ --- определяет изоморфизм $Q$ и $T$. 
+Пусть $ \nabla^Q \colon = p \nabla p^*$, 
+тогда имеем разложение   
+\[
+\nabla = 
+\begin{pmatrix}
+	\nabla^S & C \\
+	p B & \nabla^Q
+\end{pmatrix}.
+\]
+\begin{proposition}
+$\nabla^Q \colon = p \nabla p^*$ --- связность Черна на $Q$.
+\end{proposition}
+\begin{proof}
+	Пусть $\varphi \in \Gamma(Q)$. Тогда $p^* \varphi$ --- сечение $E$.
+	
+	\[
+	p\bar{\partial}(p^* \varphi) = \bar{\partial}(p p^* \varphi) = \bar{\partial} \varphi.
+	\]
+\end{proof}
+
+\begin{proposition}\label{pr:chernkr}
+	Пусть $F^S$, $F^Q$ --- кривизны связностей $\nabla^S$ и $\nabla^Q$, а $F$ --- кривизна связности $\nabla$ на $E$. Тогда:
+	\[
+	F = 
+	\begin{pmatrix}
+		F^S + \gamma \wedge \beta & \nabla^{\operatorname{Hom}(Q<S)} \gamma \\
+		\bar\partial \beta & F^Q + \beta \wedge \gamma
+	\end{pmatrix},
+	\]
+	где $\beta = p $B, $\gamma = C p^*$.
+\end{proposition}
+\begin{proof}
+	Пусть $\psi \in \Gamma(s)$, $\varphi \in \Gamma(Q)$, тогда
+	
+	\[\nabla \begin{pmatrix} \psi \\ \varphi \end{pmatrix}
+	= \begin{pmatrix}
+		\nabla^S \psi + \gamma \varphi \\
+		\nabla^Q \varphi + \beta \psi
+	\end{pmatrix}\]
+откуда
+\[
+\nabla^2 \begin{pmatrix} \psi \\ \varphi \end{pmatrix}
+= \begin{pmatrix}
+	\nabla^S (\nabla^S \psi + \gamma \varphi) + \gamma (\nabla^Q \varphi + \beta \psi) \\
+	\nabla^Q (\nabla^Q \varphi + \beta \psi) + \beta (\nabla^S \psi + \gamma \varphi)
+\end{pmatrix}
+\]
+Рассмотрим подробнее первую компоненту
+\begin{multline*}
+\nabla^S (\nabla^S \psi + \gamma \varphi) + \gamma (\nabla^Q \varphi + \beta \psi)
+= (\nabla^S)^2 \psi + \nabla^S(\gamma \varphi) + \gamma \nabla^Q \varphi +\gamma \wedge \beta \psi
+\end{multline*}
+Но 
+$\nabla (\gamma \varphi) = \nabla \gamma \cdot \varphi - \gamma \wedge \nabla \varphi.$
+а следовательно первая компонента выражения переписывается как 
+\[(\nabla^S)^2 \psi + \nabla^{\operatorname{Hom}(Q,S)} \gamma \psi +\gamma \wedge \beta \psi.
+\]
+Аналоогично рассматривается и вторая компонента
+\[\nabla^Q(\nabla^Q \varphi + \beta\psi) + \beta(\nabla^S \psi + \gamma\varphi) = (\nabla^Q)^2 \varphi + \beta \wedge \gamma \varphi + \nabla^{\operatorname{Hom}(S,Q)}\beta \psi,
+\]
+итого 
+\[\begin{pmatrix}
+	(\nabla^S)^2 \psi + \gamma \wedge \beta \, \psi + \nabla^{\operatorname{Hom}(Q,S)} \gamma \psi \\
+	(\nabla^Q)^2 \varphi + \beta \wedge \gamma \, \varphi + \nabla^{\operatorname{Hom}(S,Q)}\beta \psi
+\end{pmatrix}\]
+
+Т.к.  $F^E$ --- $(1,1)$ форма, то ее кмпоненты тоже $(1,1)$ формы, значит
+\begin{align*}
+	\nabla \beta &= \nabla^{1,0} \beta + \overline{\partial} \beta \\
+	\nabla \gamma &= \nabla^{1,0} \gamma + \bar{\partial} \gamma
+\end{align*}
+$\nabla^{1,0} \beta $ - это $(2,0)$ форма, а $\bar{\partial} \gamma$ --- $(0,2)$ форма, а значит они равн нулю, т.к. $F^E$ --- $(1,1)$ форма. Т.е. везде $\nabla^{\operatorname{Hom}}$ можно переписать как $\nabla^{(1,0)}$. То в итоге получаем 
+\[\begin{pmatrix}
+	(\nabla^S)^2 + \gamma \wedge \beta & \nabla^{1,0} \gamma \\
+	\overline{\partial} \beta & (\nabla^Q)^2 + \beta \wedge \gamma
+\end{pmatrix}
+\begin{pmatrix}
+	\psi \\
+	\varphi
+\end{pmatrix},\]
+более того $\bar \partial \gamma = 0 $.
+\end{proof}
+
+\newpage
+\section{Лекция 13}
+На проошлой лекции мы остановились на рассмотрении тоной последовательности 
+\[
+0 \longrightarrow S \xlongrightarrow{\iota} E \xlongrightarrow{p} Q \longrightarrow 0,
+\]
+линейных расслоений на комплексном многообразии $X$. А также нашли связь между связностями Черна на них (см. предложение \ref{pr:exactchern}) и было доказано также и утверждение про кривизны (см. предложение \ref{pr:chernkr}).
+В нем было показано, что $\bar\partial\gamma =0 $, тогда оно определяет $\gamma \in H^1_{X,\bar\partial}(\operatorname{Hom}(Q,S)).$ На самом деле верно даже больше, а именно пусть у нас есть две точные последовательности 
+\[
+0 \longrightarrow S \xlongrightarrow{\iota} E_1 \xlongrightarrow{p} Q \longrightarrow 0,
+\]
+\[
+0 \longrightarrow S \xlongrightarrow{\iota} E_2 \xlongrightarrow{p} Q \longrightarrow 0,
+\]
+тогда $E_1 \cong E_2$ эквивалентно соответствию  $[\gamma_1] = [\gamma_2]$.
+Т.е. $E \cong S\oplus Q$ (голоморфное) равносильно тому что $[\gamma]=0$.
+
+
+Напомним ещё пару важных свойств связности
+\begin{remark}
+	Пусть $E \to X$ --- голоморфное векторное расслоение, $H$ --- метрика, 
+	\[
+	H = (H_{\alpha \bar{\beta}}), \quad \alpha, \beta = 1, \dots, r, \quad r = \operatorname{rank} E,
+	\]
+	$z^1, \dots, z^n$ --- локальные координаты на $X$, \\
+	$e_1, \dots, e_r$ --- локальная тривиализация, $H_{\alpha \bar{\beta}} = H(e_\alpha, e_\beta)$.
+	Сечение $s = s^\alpha e_\alpha.$
+	\[\nabla_j = \nabla_{\frac{\partial}{\partial z^j}}, \quad 
+	\nabla_{\bar{k}} = \nabla_{\frac{\partial}{\partial \bar{z}^k}}\]
+	
+	Тогда, если $A^\alpha_{j,\beta} = H^{\alpha\bar\gamma}\partial_j H_{\beta\bar\gamma}$, $F_{j\bar k}^\alpha \,_\beta = - \partial _{\bar k}(A_j)$.
+	
+	\[[\nabla_j, \nabla_{\bar{k}}] \, s^\alpha = F_{j\bar{k} \, \beta}^{\ \ \ \alpha} \, s^\beta, \qquad [\nabla_j, \nabla_{\bar{m}}] \, s^\alpha 
+	= [\nabla_{\bar{k}}, \nabla_{\bar{m}}] \, s^\alpha = 0.
+	\] 
+
+\end{remark}
+
+
+\begin{remark}
+Любая связность позволяет определять параллельный перенос векторов.
+\end{remark}
+
+
+\subsection{Классы Черна}
+$X$, $E$ --- те же, что и раньше (но $E$ можно считать комплексным, со связностью $\nabla^A$).
+
+\begin{definition}
+	$P$ --- $k$-полилинейная функция на $\mathfrak{gl}(r, \mathbb{C})$ (симметрическая).
+	
+	$P(B)$ --- полином степени $k$ на $B \in \mathfrak{gl}(r, \mathbb{C})$, т.е. $B \in \operatorname{End}(\mathbb{C}^r)$.
+	
+	\term[инвариантность]{Инвариантность}  $P$, если 
+	\[
+	\forall a \in \operatorname{GL}(r, \mathbb{C}), \quad P(a B a^{-1}) = P(B).
+	\]
+\end{definition}
+	Пусть $F_A$ --- кривизна связности $\nabla^A$.
+
+Тогда
+\[
+P\left( \frac{\sqrt{-1} F_A}{2\pi} \right)
+\]
+является $2k$-формой на $X$, она корректно определена.
+
+\begin{proposition}
+Верны следующие свойства:
+\begin{enumerate}
+	\item $P\left( \dfrac{\sqrt{-1} F_A}{2\pi} \right)$ замкнута;
+	\item Класс $\left[ P\left( \dfrac{\sqrt{-1} F_A}{2\pi} \right) \right]$ не зависит от выбора связности.
+	\item Если $\Phi \colon Y\to X$ --- гладкое отображение, то 
+	\[\Phi^* P\bigg(\frac{\sqrt{-1}F_A}{2\pi}\bigg) = P\bigg(\frac{\sqrt{-1}\Phi^*F_A}{2\pi}\bigg).\]
+	а значит $\Phi^*[P(E)] = [P(\Phi^*E)]$
+\end{enumerate}
+\end{proposition}
+
+Посмотрим на 
+\[P(B) = \det(\operatorname{Id}+B) = 1+P_1(B)+\dots + P_r(B)\]
+
+
+\begin{definition}
+\term[$k$- класс Черна]{$k$- классом Черна} $c_k(E)$ называется класс 
+\[\left[P_k \left( \frac{F_A}{2\pi} \right) \right].\]
+\end{definition}	
+Например
+\[c_1(E) = \frac{\sqrt{-1}}{2\pi}\operatorname {Tr}(F_A)\]
+
+\[c_2(E) = \frac{1}{8\pi^2} \left( \operatorname{Tr}(F_A \wedge F_A) - \operatorname{Tr}(F_A)^2 \right)
+\]
+
+Если $E$ --- голоморфное векторное расслоение, то $c_k(E)$ представляется формой типа $(k, k)$.
+
+Пусть $H_1$, $H_2$ --- две эрмитовы метрики. Тогда первый класс Черна задаётся формулой:
+
+\[
+c_1(E) = \left[ -\sqrt{-1} \, \partial \bar{\partial} \log \det H_1 \right].
+\]
+
+Так как класс Черна не зависит от выбора метрики, имеем:
+
+\begin{align*}
+	c_1(E) &= \left[ -\sqrt{-1} \, \partial \bar{\partial} \log \det H_2 \right] 
+\end{align*}
+откуда если рассмотреть разность
+\begin{multline} -\sqrt{-1} \, \partial \bar{\partial} \log \det H_1 
++ \sqrt{-1} \, \partial \bar{\partial} \log \det H_2 \\
+= \sqrt{-1} \, \partial \bar{\partial} 
+\log \left( \frac{\det H_2}{\det H_1} \right) = \sqrt{-1}\partial \bar\partial \det{H_1^{-1}H_2},
+\end{multline}
+обозначив за $h = H_1^{-1}H_2$, то
+\[(F_1)_{j\bar{k}} - (F_2)_{j\bar{k}} = \partial_{\bar{k}} \left( \nabla^{2}_j h \cdot h^{-1} \right),
+\]
+$(F_i)_{j\bar{k}}$ --- компоненты кривизны соответствующей связности $\nabla^{(i)}$.
+Эта формула очень полезна и позволяет сравнивать кривизны двух связностей Черна.
+
+Пусть $X$ --- комплексное многообразие, $T_x^{1,0}$ --- голоморное касательное расслоение и $T_x\otimes \mathbb{C} = T_x^{1,0} \oplus T_x^{0,1}$. Заметим, что на $T_x$ есть оператор $J$. Пусть на $X$ есть метрика $g$, совместная с $J$, т.е. 
+\[g(\xi,\eta)=g(J\xi,J\eta). \]
+Тогда она определяет эрмитову метрику на $T_x^{1,0}$. 
+
+Обратно, эрмитова метрика на $T_x^{1,0}$ определяет метрику на $T_x$, совместимую с $J$.
+
+
+На $T_x^{1,0}$ есть связность Черна $\nabla$, а на $T_x\otimes \mathbb{C}$ связность Леви-Чивиты $\nabla^g$. Потребуем чтобы $\nabla^g J = 0$ (вообще говоря в общем случае это не так). Тогда $\nabla^g$ сохраняет $T_x^{1,0}$ и $T_x^{0,1}$.
+Рассмотрим
+\[\partial_j = \frac{\partial}{\partial z^j}, \quad 
+\partial_{\bar{k}} = \frac{\partial}{\partial \bar{z}^k} \]
+то
+\[J(\nabla^{g}_{m} \partial_j) = \nabla^{g}_{m} J(\partial_j).\]
+Следовательно существует $\Gamma^i_{jk}$, такая что 
+\begin{align*}
+&	\nabla^{g}_{m} \partial_j = \Gamma^s_{mj} \, \partial_s, & \nabla^g_{\bar{m}} \, \partial_{\bar{k}} = \Gamma^{\bar{s}}_{\bar{m} \bar{k}} \, \partial_{\bar{s}}.
+\end{align*}
+заметим, что $\nabla^g_{\bar{m}} \, \partial_k = \nabla^g_k \, \partial_{\bar{m}}$, это верно, т.к. $\nabla^g$ без кручения. Слева в равенстве стоит $(1,0)$ вектор, а справа $(0,1)$ поэтому $\nabla^g_{\bar{m}}\partial_k =0$. Продолжим метрику по линейности на комплексификацию касательного расслоения $g_{j\bar{k}} = g(\partial_j, \partial_{\bar{k}})$, поэтому 
+\[\partial_m g_{j\bar{k}} = \partial_m \, g(\partial_j, \partial_{\bar{k}}) = g(\nabla_m \partial_j, \partial_{\bar{k}}) = \Gamma^s_{mj} \, g_{s\bar{k}}
+\]
+следовательно $\Gamma^s_{mj} = g^{s\bar{k}} \, \partial_m g_{j\bar{k}},$ т.е $\nabla^g = \nabla$ на $T_x^{0,1}$.
+
+Заметим, что из $\nabla_m \partial_j = \nabla_j \partial_m $ следует $ \Gamma^s_{mj} = \Gamma^s_{jm} $ и $ \partial_m g_{j\bar{k}} = \partial_j g_{m\bar{k}}$ для всех  $j, m, k.$  Аналогично, $ \partial_p g_{j\bar{k}} = \partial_{\bar{k}} g_{j\bar{p}} $.
+
+
+Рассмотрим мнимую часть эрмитовой метрики 
+\[
+\omega = \frac{\sqrt{-1}}{2} \sum_{j,k} g_{j\bar{k}} \, dz^j \wedge d\bar{z}^k
+\]
+
+$\mathbb{P}$ --- из формулы выше эквивалентно тому, что $d\omega = 0$.
+
+
+\begin{definition}
+	Риманова метрика $g$ на $X$, совместимая с $J$, называется \term[кэллерова метрика]{кэллеровой}, если
+	\[
+	\omega = \frac{\sqrt{-1}}{2} \sum g_{j\bar{k}} \, dz^j \wedge d\bar{z}^k
+	\]
+	замкнута, то есть $d\omega = 0$.
+\end{definition}
+
+\begin{theorem}\label{TFAE}
+	Пусть $(X, g, J, \omega)$ --- как выше. Следующие условия эквивалентны:
+	
+	\begin{enumerate}
+		\item $\nabla^g J = 0$;
+		\item $\nabla^g \omega = 0$;
+		\item $d\omega = 0$;
+		\item $\nabla^g = \nabla$, где $\nabla$ --- связность Черна на $T^{1,0}_X$;
+		\item В окрестности любой точки $x \in X$ существуют голоморфные координаты $(z^1, \dots, z^n)$, такие что
+		\[
+		g_{j\bar{k}} = \delta_{jk} + \mathcal{O}(|z|^2).
+		\]
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+$\omega(\xi, \eta) = g(J\xi, \eta)$
+то $1) \Leftrightarrow 2)$.
+из 4) $\Rightarrow$ 3) мы показали выше. Заметим, что $3) \Leftrightarrow 5)$, из $5)$ в $3)$ очевидно, а в обратную сторону рассмотрим произвольную систему координат $z^j$, тогда замена вида  $w^j = \bar{z}^j - \frac{1}{2} \, \partial_a g_{b\bar{j}}(x) \, z^a z^b
+$. В координатах $w^j$ метрика имеет заданный вид
+
+\end{proof}
+
+\newpage
+\section{Лекция 14}
+\subsection{Кэллеровы многообразия}
+
+На прошлой лекции мы дказали очень важную теорему \ref{TFAE} и дли определение Кэллеровой метрики. Заметим сначала следующее. 
+\begin{proposition}
+\begin{enumerate}
+\item[1)] Пусть $(X_1,\omega_1)$ и $(X_2,\omega_2)$ --- два кэллеровых многообразия, то их произведение $(X_1\times X_3, \omega_1 + \omega_2)$ также является кэллеровым многообраазием.
+\item[2)] Если $(X,~ \omega)$ кэллерово многообразие, $Y\subset X$ --- комплексное подмногообразие, то $(Y,\omega|_Y)$ --- кэллерово.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Доказательство первого пункта очевидно, потому рассмотрим второй. После ограничения форма $\omega|_Y$ положительна и задает эрмитову метрика, в силу функтуриальности дифференциала верным остается и то, что $d(\omega|_Y) =(d\omega)|_Y$
+\end{proof}
+Рассмотрим несколько примеров
+
+\begin{example}
+Стандартная эрмитова метрика на$ \mathbb{C}^n$ дает кэллерову метрику
+ \[\omega = \frac{\sqrt{-1}}{2} \sum_{j=1}^n dz^j\wedge d\bar{z}^j.\]
+Про эту метрику можно заметить то, что она инвариантна относительно сдвигов, потому  многообразие $\mathbb{C}^n/\Lambda$ тоже кэллерово, где $\Lambda \simeq \mathbb{Z}^{2n}$ --- решетка.
+\end{example}
+
+\begin{example}
+Подмногооюбразия в $\mathbb{C}^n$ кэллеровы. Например гиперповерхности вида 
+\[z_1^d + \dots + z_n^d=1\]
+кэллерово многообразие.
+\end{example}
+\begin{example}
+Рассмотрим $\mathbb{CP}^n$ и 
+\[\omega = \omega_{FS} = \sqrt{-1}\partial\bar\partial \log{\bigg(\sum_{j=0}^n |z_j|^2\bigg)} ,\]
+где $z_j$ --- это одна координата (сечение $\mathcal{O}(1)$)
+Как уже упоминалось, если $f$ нигде не нулевая голоморфная функция, то 
+\begin{multline*}
+\sqrt{-1} \partial \bar{\partial} \log |f|^2 = \sqrt{-1} \partial \left( \frac{f \partial \bar{f}}{|f|^2} \right) \\
+= \sqrt{-1} \left[ \frac{\partial f \wedge \partial \bar{f}}{|f|^2} - \frac{\bar{f} \partial f \wedge \bar{f}\partial \bar{f}}{|f|^4} \right] \\
+= \sqrt{-1} \left[ \frac{\partial f \wedge \bar\partial \bar{f}}{|f|^2} - \frac{\partial f \wedge \bar\partial \bar{f}}{|f|^2} \right] = 0
+\end{multline*}
+Пусть $U_0 = \{[z] \in \mathbb{CP}^n|z_0 \neq0\}$, тогда  в карте  $w^j = z_j/z_0$ имеем 
+\[\log \left( \sum_{j=0}^{n} |z_j|^2 \right) = \log |z_0|^2 + \log \left( 1 + \sum_{j=1}^{n} |w_j|^2 \right)\]
+Но $ \partial \bar{\partial} \log |f|^2 = 0$, поэтому  в $U_0$ 
+\[\omega_{FS}=\sqrt{-1}\partial\bar\partial \log \left( 1 + \sum_{j=1}^{n} |w_j|^2 \right). \]
+Для краткости обозначим $|w|^2 \colon = \sum_{j=1}^{n} |w_j|^2 $, таким образом 
+\begin{equation*}
+\omega_{FS} = \sqrt{-1} \partial \left( \frac{w^k d\bar{w}^k}{1 + |w|^2} \right) 
+= \sqrt{-1} \left[ \frac{\delta_{jk} dw^j \wedge d\bar{w}^k}{1 + |w|^2} \right. 
+\left. - \frac{\bar{w}^j w^k dw^j \wedge d\bar{w}^k}{(1 + |w|^2)^2} \right]
+\end{equation*}
+следовательно $$g_{i\bar k} = \frac{\delta_{j\bar k}}{1+|w|^2} - \frac{w^k\bar w^j}{(1+|w|^2)^2}.$$
+заметим, что на $\mathbb{CP}^n$ транзитивно действует унитарная группа $U(n+1)$ и сохранят сумму $\sum|z_j|^2$, а следовательно и $\omega_{FS}$. Таким образом нам остается проверить положительность формы лишь в одной точке. Получается, что $\mathbb{CP}^n$ и его подмногообразия кэллеровы ($d\omega_{FS}=0$).
+\end{example}
+
+\begin{example}
+Рассматрим единичный шар $B = \left\{ z \in \mathbb{C}^n \mid |z| \leq 1 \right\}$ в $\mathbb{C} ^n$   с метрикой $\omega_B = \sqrt{-1} \partial \bar{\partial} \log(1 - |z|^2)$, действуя аналогично предыдущему примеру можно также доказать что оно кэллерово. Можно смотреть на $B$ как на шар в $\mathbb{CP}^n$, с условием 
+\[|z_0|^2 \geq \sum_{j=1}^n|z_j|^2\]
+Получается, что на $B$ транзитивно действует группа $U(1,n)$.
+\end{example}
+Рассмотренные примеры примечательны тем, что представляют собой примеры многообрзий с постоянной кривизной, но только в комплексном случае.
+
+Вообще говоря проекция проекция
+\[(S^{2n-1}, g_{\text{can}}) \longrightarrow (\mathbb{CP}^n, \omega_{FS})\]
+является римновой субмерсией, где $g_{\text{can}}$ --- стандартная каноническая метрика на $S^{2n-1}_{\mathbb{R}}$.
+
+
+Рассмотрим на кэллеровом многообразии $(X,~ \omega)$ векторные поля $\xi$, $\zeta$ и $\tau$. Тензор Римана определяется как
+\[R(\xi, \eta)\tau = \left( \nabla_\xi \nabla_\eta - \nabla_\eta \nabla_\xi - \nabla_{[\xi, \eta]} \right) \tau.\]
+и тензор кривизны
+\[R(\xi, \eta, \tau, \zeta) = g(R(\xi, \eta), \tau, \zeta).\]
+
+Напомним, что тензор Римана связности Леви-Чивитты(в нашем случае это тоже саме, что и связность Черна) обладает следующими симметриями 
+\begin{enumerate}
+    \item $R(\xi, \eta)\tau = -R(\eta, \xi)\tau$,
+    \item $R(\xi, \eta, \tau, \zeta) = -R(\xi, \eta, \zeta, \tau)$,
+    \item $R(\xi, \eta, \tau, \zeta) + R(\eta, \tau, \xi, \zeta) + R(\tau, \xi, \eta, \zeta) = 0$,
+    \item $R(\xi, \eta, \tau, \zeta) = R(\tau, \zeta, \xi, \eta)$.
+\end{enumerate}
+Теперь кэллеров случай, т.к. комлексная структура параллельна, то верно:
+\begin{enumerate}
+    \setcounter{enumi}{4} 
+	\item $\nabla J = 0 \implies R(\xi, \eta) J \tau = J(R(\xi, \eta)\tau)$
+	\item a из  $g(J\cdot, J\cdot) = g(\cdot, \cdot)$  следует, что $R(\xi, \eta, J\tau, J\zeta) = R(\xi, \eta, \tau, \zeta)$
+\end{enumerate}
+Таким образом из всех этих симметрий следует то, что на кэллеровом многообразии ненулевые компоненты $R$ это
+\[R\left(\frac{\partial}{\partial z^a}, \frac{\partial}{\partial \bar{z}^b}, \frac{\partial}{\partial z^c}, \frac{\partial}{\partial \bar{z}^d}\right)\]
+т.е. с точностью до сопряжения и перестановок векторов
+
+В вещественном случае также можно определить секционную кривизну:
+\[\frac{R(\xi, \eta, \eta, \xi)}{|\xi|^2|\eta|^2 - g(\xi, \eta)^2}.\]
+	Пусть $e_1,\dots,e_{2n}$ --- ортонормированный базис, то тензор Риччи (который по линейности продолжается и на все остальные вектора)
+\[\operatorname{Ric}(e_i, e_j) = \sum_{k \ne j} R(e_i, e_k, e_k, e_j).\]
+
+На кэллеровом многообразии 
+\[\left[ \nabla_{\frac{\partial}{\partial {z}^a}}, \nabla_{\frac{\partial}{\partial \bar{z}^b}} \right] \frac{\partial}{\partial z^c} = R_{{a} \bar{b} c}^{\quad d} \frac{\partial}{\partial z^d},\]
+где
+\[R_{{a} b \bar{c}}^{\quad d} = -\partial_{{a}} \partial_{\bar b} g_{c \bar{p}} g^{d \bar{p}}- \\
+- \partial_{\bar b} g^{d \bar{p}} \partial_{{a}} g_{c \bar{p}} = \\
+= -\partial_{{a}} \partial_{\bar b} g_{c \bar{p}} g^{d \bar{p}} + g^{d \bar{q}} \partial_{\bar b} g_{\bar{q} \bar{s}} g^{s \bar{p}} \partial_{{a}} g_{c \bar{p}}\]
+Иначе говоря можно переписать 
+\[R\left(\frac{\partial}{\partial z^a}, \frac{\partial}{\partial \bar{z}^b}, \frac{\partial}{\partial z^c}, \frac{\partial}{\partial \bar{z}^d}\right) =R_{a\bar{b}c\bar{d}} = R_{a\bar{b}c}^{\quad e} g_{e\bar{d}} = R_{a\bar b c \bar d}.\]
+
+\begin{definition}[Комплексный тензор Риччи]
+\term[Комплексным тензором Ричи]{Комплексный тензор Риччи} называется тензор
+\[R_{j\bar{k}} \colon = R_{j\bar{k} a\bar{b}} g^{a\bar{b}} \quad \left( = R_{a\bar{b} j\bar{k}} g^{a\bar{b}} \right)\]
+\end{definition}
+заметим, что это равенство также переписывается как 
+\[R_{j\bar{k} a}^{\quad a} = -\partial_j \partial_{\bar{k}} g_{a\bar{b}} \cdot g^{a\bar{b}} + \partial_j g g \partial_{\bar{k}} g = \\
+= -\partial_{\bar{k}} \left( g^{a\bar{b}} \partial_j g_{a\bar{b}} \right) = - \partial_j\partial{\bar k}\log{\det(g)}. \]
+Т.е. альтернативным определением тензора Риччи является \[R_{j\bar{k}} \colon = -\partial_j \partial_{\bar{k}} \log \det(g),\] 
+обозначим $\operatorname{Ric}^\text{K} = \sqrt{-1} R_{j\bar{k}} dz^j \wedge d\bar{z}^k$.
+
+\begin{proposition}
+Определение комплексного тензора Риччи в слеждующем смысле совпадает с вещественным: если $u =1/\sqrt{2}(e-\sqrt{-1}Je)$, где $e$ --- вещественный вектор, то 
+\[\operatorname{Ric}^{\text{K}}(u, \bar{u}) = \operatorname{Ric}(e, \bar{e}).\]
+\end{proposition}
+\begin{proof}
+Достаточно проверить в касательном пространстве в некоторой точке. Возьмем в касательном пространстве к ней  вещественный базис вида $e_{1}, \dots, e_{n}, J e_{1}, \dots, J e_{n}$ , где $|e_i|=1$. (соответственно $u_j = 1/\sqrt{2}(e_j - \sqrt{-1}Je_j)$).
+Таки образом просто расписывая свертку, получаем
+\[\text{Ric}(u_j, \bar{u}_j) = \sum_{k=1}^{n} R(u_j, \bar{u}_j, u_k, \bar{u}_k).\]
+Рассмотрим компоненты полученного равенства поподробнее:
+\[R(u_j, \bar{u}_j, u_k, \bar{u}_k) = \frac{1}{2} R(e_j - \sqrt{-1} J e_j, e_j + \sqrt{-1} J e_j, u_k, \bar{u}_k) = \sqrt{-1} R(e_j, J e_j, u_k, \bar{u}_k)\]
+\begin{multline}\label{longrichi}
+    R(u_j, \bar{u}_j, u_k, \bar{u}_k) = \frac{1}{2} R(e_j - \sqrt{-1} J e_j, e_j + \sqrt{-1} J e_j, u_k, \bar{u}_k) \\ = \sqrt{-1} R(e_j, J e_j, u_k, \bar{u}_k) = -R(e_j, J e_j, e_k, J e_k) \\
+    = R(J e_j, e_k, e_j, J e_k) + R(e_k, e_j, J e_j, J e_k)
+\end{multline}
+Рассмотрим первое слагаемое суммы:
+\begin{multline*}
+R(u_j, \bar{u}_j, u_k, \bar{u}_k) = \frac{1}{2} R(e_j - \sqrt{-1} J e_j, e_j + \sqrt{-1} J e_j, u_k, \bar{u}_k) = \sqrt{-1} R(e_j, J e_j, u_k, \bar{u}_k) \\= -R(e_j, J e_j, e_k, J e_k) = R(J e_j, e_k, e_j, J e_k) + R(e_k, e_j, J e_j, J e_k)
+\end{multline*}
+таким образом \eqref{longrichi} переписывается как
+\[R(e_j, J e_k, J e_k, e_j) + R(e_k, e_j, e_j, e_k).\]
+Итого сумма всех компонент будет равна
+\[\sum_{k=1}^{n} \left[ R(e_j, J e_k, J e_k, e_j) + R(e_j, e_k, e_k, e_j) \right] = \text{Ric}(e_j, e_j)\]
+\end{proof}
+
+
+
+
+\newpage
+\section{Лекция 15}
+Как мы показали в прошлой лекции, комплексное определение тензора Риччи на кэллеровом многообразии в некотором смысле совпадает с обычным тензором Риччи, определяемом через риманову метрику. Напомним, что 
+\[R_{j\bar k} = - \partial_j\partial_{\bar k}\log\det(g),\]
+т.е.  тензор Риччи совпадает с кривизной на линейном расслоении $\Lambda^n(T^{1,0}_X$. Соответственно $-R_{j\bar k}$ будет кривизной на каноническом расслоении $K_X =\Lambda^n(T^{*\ \ 1,0}_X )$.
+\[\operatorname{Ric}(\omega) = \sqrt{-1}\, R_{j\bar{k}}\, dz^j \wedge d\bar{z}^k = -\sqrt{-1}\, \partial \bar{\partial} \log \omega^n\]
+Ну и соответственно кривизна на $K_X$ получается равна $-\operatorname{Ric}(\omega)$. 
+Заметим также, что когомологический класс совпадает с первым классом Черна
+\[\bigg[\frac{\operatorname{Ric}(\omega}{2\pi}\bigg] =c_1(X),\]
+откуда можно заметить то, что $c_1(K_X) = - c_1(X)$.
+\begin{remark}
+Заметим, что если мы не возьмем не кэллерово многообразие и $\omega$ будет незамкнутой эрмитовой $(1,1)$ формой, то $R_{j\bar k}$ никакое отношение к кривизне Риччии иметь не будет, однако утверждение про класс Черна все еще останется справедливым.
+\end{remark}
+
+\subsection{Голоморфная бисекционная кривизна}
+Обсудим дальше бисекционную кривизну, определяему. следующим образом.
+Пусть $(X,~ \omega)$ --- кэллерово многообразие размерности $\dim_\mathbb{C} = n$, тогда 
+\begin{definition}
+Пусть $\xi$, $\eta$ --- вектора типа $(1,0)$. \term[Голоморфная бисекционная кривая]{Голоморфной бисекционной кривизной} называется
+\[\frac{R(\xi, \bar{\xi}, \eta, \bar{\eta})}{|\xi|^2 |\eta|^2}.\]
+\end{definition}
+рассмотрим в термминах стандартного вещественного базиса
+\begin{align*}
+&\xi = \frac{1}{\sqrt{2}} \left( e_1 - i J e_1 \right), &
+\eta = \frac{1}{\sqrt{2}} \left( e_2 - i J e_2 \right),
+\end{align*}
+тогда $|\xi|=|\eta|=1$. Таким образом, применяя перестановочные свойства тензора и тожедество бьянки
+\begin{multline*}
+R(\xi, \bar{\xi}, \eta, \bar{\eta}) = -R(e_1, J e_1, e_2, J e_2) \\
+= R(J e_1, e_1, e_1, J e_2) + R(e_2, e_1, J e_2, J e_2) \\ = R(J e_2, e_1, e_1, J e_2) + R(e_2, e_1, e_1, e_2)
+\end{multline*}
+т.е. бисекционная кривая является суммой двух секционных кривизн. Основная важность рассмотренной нами кривизны заключается в слудеющей теореме.
+\begin{theorem}
+Пусть $(X,~ \omega)$  --- односвязное кэллерово многообразие, такое что голоморная бисекционная кривизна $\omega$ постоянна, т.е. $\forall \xi, \eta$
+\[\frac{R(\xi, \bar{\xi}, \eta, \bar{\eta})}{|\xi|^2 |\eta|^2} = \kappa.\]
+Тогда 
+\begin{enumerate}
+\item Если $\kappa > 0$, то с точностью до домножения на $\sqrt{\kappa}$ $(X,~ \omega) = (\mathbb{CP}^n,\omega_{FS})$,
+\item Если $\kappa =0$, то многообраазие $(X,~ \omega) = (\mathbb{C}^n,\omega_{eucl})$. Где 
+\[\omega_{eucl} =c\sum_{j=1}^n dz^j\wedge d \bar z^j\]
+\item Если $\kappa <0$, то с точностью до растяжений $X = \mathbb{B}^n$, $\omega = -\sqrt{-1}\partial \bar\partial\log(1-|z|^2)$.
+\end{enumerate}
+\end{theorem}
+Доказательство этой теоремы мы не будем приводить в рамках этого курса.
+
+Рассмотрим также ещё один важный инвариант:
+\begin{definition}
+\term[Голоморфная секционная кривизна]{Голоморной секционной кривизной} называется
+\[\frac{R(\xi, \bar{\xi}, \xi, \bar{\xi})}{|\xi|^4}.\]
+\end{definition}
+Если голоморфная бисекционная кривизна посчитана и равна $\kappa$, то 
+\[R_{a \bar{b} c \bar{d}} = K \left( g_{a \bar{b}} g_{c \bar{d}} + g_{a \bar{d}} g_{c \bar{b}} \right).\]
+
+\subsection{Лапласиан}
+Мы ограничимся в данной теории связными компактными кэллеровыми многообразиями $(X,~ \omega)$. Т.к. распространение на некомпактный случай далеко не всегда известно и   также методически полезно как изложенная ниже теория.
+\[\omega = \sqrt{-1} g_{j\bar k} dz^j\wedge d\bar z^k.\]
+Рассмотрим функцию $f\in C^\infty(X)$, тогда 
+
+\begin{definition}
+\term[Лапласиан]{Лапласианом} $\Delta$ называется оператор $\Delta = g^{j\bar k}\partial_j\partial_{\bar k}$
+\[\Delta \colon C^\infty(X, \mathbb{R}) \rightarrow C^\infty(X, \mathbb{R}).\]
+\end{definition}
+Очевидно, что $\Delta$ вещественный. На самом деле $2\Delta = \Delta_{\mathbb{R}}$, где $\Delta_{\mathbb{R}}$ --- оператор Лапласа-Бельтрами, что проверяется простым вычислением в координатах.
+
+\begin{proposition}
+Пусть $f\in C^\infty(\mathbb{R})$, то на компактном комплексном $(X,~ \omega)$
+\[\int_X \Delta f \omega^n =0.\]
+\end{proposition}
+\begin{proof}
+Будем считть, что $n\geq 2$, заметим, что $\Delta f = \operatorname{Tr}_{\omega} \left( \sqrt{-1}  \partial \bar{\partial} f \right)$, тогда из упражнение 
+\[n (n - 1) \, \sqrt{-1} \, \partial \bar{\partial} f \wedge \omega^{n-2}
+= \left[ (\Delta f) \, n - \Delta f \right] \omega^{n}
+= (n - 1)  \Delta f \omega^{n},\]
+тогда восподьзовавшись теоремой Стокса
+\[0 =  \int \sqrt{-1} \, \partial \bar{\partial} f \wedge \omega^{n-1} 
+= \int (\Delta f) \omega^{n}. \]
+\end{proof}
+Отсюда вытекает: 
+\begin{corollary}
+Если $\Delta f \geq 0$, то $f = \text{const}.$
+\end{corollary}
+\begin{proof}
+\[0 = \int \frac{1}{2} \, \Delta (f^2) \, \omega^n 
+= \int f \, \Delta f \, \omega^n 
++  \int \sqrt{-1} \, \partial f \wedge \bar{\partial} f \wedge \omega^{n-1}\geq 0\]
+сумма больше нуля и.к второе слагаемое строго положительно, если $f \neq \text{const}$, а первое слагаемое, т.к. $f \in C^\infty(X)$ положительна (так можно считать т.к. $f$ ограничена и в силу нечувствительности лаплассиана к константе мы можем сделать ее таковой) и выполнено условие требуемое в следсвтвии.
+\end{proof}
+
+Пусть $E \to X$ --- голоморфное векторное расслоение, $H_{\alpha \bar \beta}$ --- эрмитова метрика на $E$, задана кривизна
+\[F_{j \bar{k} \, \beta}^{\ \ \ \alpha} 
+= - \partial_{\bar{k}} \left( H^{\alpha \bar{\gamma}} \, \partial_j H_{\beta \bar{\gamma}} \right).\]
+Определим тогда $K_{\ \beta}^{\alpha} = g^{j \bar{k}} F_{j \bar{k} \, \beta}^{\ \ \ \alpha}$ --- эндоморфизм $E$. И эрмитову форму $K_{\alpha  \bar\gamma} = K_{\ \beta}^{\alpha} \, H_{\alpha \bar{\gamma}}$. Оба $K_{\ \beta}^{\alpha} $ и $K_{\alpha  \bar\gamma}$ называются средними кривизнами.
+
+
+
+\begin{proposition}
+Пусть $(X,~ \omega)$  --- компактно кэллерово, $(E,H)$ --- голоморфное векторное расслоение с эрмитовой метрикой и пусть $\kappa \leq 0$, тогда любое голоморфное сечение $s \in H^0(X,E)$ параллельно. Если $\kappa < 0$ в одной точке, то $H^0(X,E) =0$.
+\end{proposition}
+\begin{proof}
+Возьмем $f=|s|^2_H = H_{\alpha \bar\beta} s^\alpha s^\beta$. Тогда
+\begin{multline*}
+\Delta f 
+= g^{j \bar{k}} \, \partial_j \partial_{\bar{k}} |s|_H^2
+= g^{j \bar{k}} \, \partial_{\bar{k}} \left( H_{\alpha \bar{\beta}} \, \nabla_j s^{\alpha} \, \overline{s^{\beta}} \right) \\
+= g^{j \bar{k}} \left( H_{\alpha \bar{\beta}} \, \nabla_{\bar{k}} \nabla_j s^{\alpha} \, \overline{s^{\beta}} \right)
++ g^{j \bar{k}} \, H_{\alpha \bar{\beta}} \, \nabla_j s^{\alpha} \, \overline{\nabla_k s^{\beta}},
+\end{multline*}
+последнее равенство следует из голоморфности сечений. После чего в первом слагаемом перемтавим производные местами, а про второе заметим, что оно равна норме ковариантной производной $|\nabla s|^2_H$.  Таким образом, учитывая что 
+\[g^{j,\bar k}\nabla_{\bar{k}} \nabla_j S^{\alpha}
+= g^{j,\bar k}(\cancelto{0}{\nabla_j \nabla_{\bar k} s^{\alpha}}
+- F_{j \bar{k} \, \beta}^{\ \ \ \alpha} S^{\beta}) = -K^\alpha_\gamma s^\gamma,
+\]
+наш лапласиан переписывается как
+\[\Delta |s|_H^2 
+= |\nabla s|_H^2 
+- K_{\ \beta}^{\alpha} S^{\beta} \overline{S^{\gamma}} H_{\alpha \bar{\gamma}}.
+\]
+Проинтегрируем полученное равенство:
+\[0 = \int |\nabla s|_H^2 \, \omega^n 
+- \int K(S, S) \, \omega^n \geq \int |\nabla s|_H^2 \, \omega^n \geq 0 .
+\]
+из которого и следует все утверждение теоремы.
+\end{proof}
+
+\begin{corollary}
+\begin{enumerate}
+\item Если на $(X,~ \omega)$  выполнено $\operatorname{Ric}(\omega)>0$, то на $X$ нету голоморфных $(1,0)$-форм и $(n,0)$-форм. Более того,для любого $m \in \mathbb N$ $K_X^{\otimes m}$ не имеет сечений.
+
+\item Если $\operatorname{Ric}(\omega)<0$,  то на $X$ нету голоморфных векторных полей.
+
+\item Если $\operatorname{Ric}(\omega)=0$, то все голоморфные векторные поля и голоморные $(1,0)$-формы , а также голоморные $(n,0)$-формы параллельны.
+\end{enumerate}
+\end{corollary}
+
+Далее будем пользоваться следующими удобными обозначениями
+\begin{align*}
+&\nabla^{j} = g^{j \bar{k}} \nabla_{\bar{k}},  &\nabla^{\bar{k}} = g^{j \bar{k}} \nabla_{j}.
+\end{align*}
+
+На любом голоморфном расслоении можно ввести лапласиан как
+\begin{align*}
+	&\nabla^{j} \nabla_{j} = - \nabla^{*} \nabla, &\nabla^{\bar{k}} \nabla_{\bar{k}} = - \bar{\nabla}^{*} \bar{\nabla}.
+\end{align*}
+Если $s\in \Gamma(E)$Ю $H$ --- метрика, то 
+\begin{multline}
+	\int H_{\alpha \bar{\beta}} \, \nabla^{j} \nabla_{j} s^{\alpha} \, \overline{S^{\beta}} \, \omega^n
+	= \int H(\nabla^{j} \nabla_{j} s, s) \, \omega^n \\
+	= - \int H_{\alpha \bar{\beta}} \, \nabla_{j} s^{\alpha} \, \overline{\nabla^{j} s^{\beta}} \, \omega^n
+	= \int |\nabla s|^2 \, \omega^n
+\end{multline}
+Аналогичено все тоже самое верно и для второго лапласиана.
+
+В конце заметим, что 
+\[(\nabla^{*} \nabla - \bar{\nabla}^{*} \bar{\nabla}) s = \mathcal F s,
+\]
+где $\mathcal F$ зависит от кривизн на $E$ и на $X$.
+
+\subsection{\texorpdfstring{Расслоение $(p,q)$-форм}{Расслоение (p,q)-форм}}
+
+Напомним определение звездочки Ходжа. Пусть $\varphi, \psi \in \Gamma(\Lambda^{p,q} T_X^* )
+$, т.е. 
+\[\psi = \psi_{A \bar{B}} \, dz^{A} \wedge d\bar{z}^{B}, 
+\qquad 
+\psi = \psi_{A \bar{B}} \, dz^{A} \wedge d\bar{z}^{B}.
+\]
+где $A$ и $B$ --- мультииндексы. 
+Определим скалярное произведение
+\[\langle \varphi, \psi \rangle
+= \frac{1}{p! \, q!}  
+\varphi_{A \bar{B}} \,
+\overline{\psi_{A' \bar{B}'}} \,
+g^{A \bar{A}'} g^{B \bar{B}'}
+\]
+\begin{proposition}
+	Существует оператор $* : \Lambda_x^{p,q} \to \Lambda _X^{n-q,n-p}$, такой что 
+\begin{enumerate}
+	\item $\displaystyle 
+	\langle \varphi, \psi \rangle \, \frac{\omega^n}{n!}
+	= \varphi \wedge * \overline{\psi}$
+	
+	\item $*$ --- вещественный оператор 
+	
+	\item $\displaystyle **\varphi = (-1)^{p+q} \, \varphi$
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+	Пусть $\psi$ --- форма типа $(p,q)$.  
+	Кэлерова метрика определяет изоморфизм между формами типов $(p,q)$ и $(q,p)$.
+Пусть $\psi^\sharp$ это результат такого отображения. Пусть теперь 
+\[* \psi = C_{n,p,q} \, \psi^{\#} \,\lrcorner\, \frac{\omega^n}{n!},
+\]
+очевидно, что 2ое и 3е условия будут выполненты, если верно подобрать константу $C_{n,p,q}$, она зависит только от $n,p,q$, и ее поиск остается как упражнение читателю. Ну и первое соответственно тоже.
+\end{proof}
+
+\begin{definition}
+	Определим операторы 
+	\begin{align*}
+		\bar{\partial}^{*} &= - * \, \partial \, * , 
+		&\quad \Gamma(\Lambda^{p,q} T_X^*) \longrightarrow \Gamma(\Lambda^{p,q-1} T_X^*), \\[0.5em]
+		\partial^{*} &= - * \, \bar{\partial} \, * , 
+		&\quad \Gamma(\Lambda^{p,q} T_X^*) \longrightarrow \Gamma(\Lambda^{p-1,q} T_X^*), \\[0.5em]
+		d^{*} &= - * \, d \, * , 
+		&\quad \text{$k$-формы} \longrightarrow \text{ $k-1$-формы}
+	\end{align*}
+\end{definition}
+Понятно, что звездочку ходжа можно продлить на 
+\[* : \Gamma(\Lambda^{p,q} T_X^* \otimes E)
+\longrightarrow
+\Gamma(\Lambda^{n-p,\,n-q} T_X^* \otimes E^*)
+\]
+и определить там похожие операторы:
+\begin{definition}
+	Оператор $\partial_{\nabla}$ --- это $(1,0)$-часть связности Черна.
+\end{definition}
+
+\begin{definition}
+	А также операторы
+	\[
+	\begin{aligned}
+		\Delta_{\bar{\partial}} &:= \bar{\partial}\bar{\partial}^{*} + \bar{\partial}^{*}\bar{\partial}, \\[0.3em]
+		\Delta_{\partial} &:= \partial\partial^{*} + \partial^{*}\partial, \\[0.3em]
+		\Delta_{d} &:= dd^{*} + d^{*}d.
+	\end{aligned}
+	\]
+\end{definition}
+
+\newpage
+\section{Лекция 16}
+На этой лекции мы продолжим рассматривать компактные кэллеровы многообразия. Мы определили несколько операторов, а именно
+\begin{align*}
+	&\bar{\partial}^{*} = - * \, \partial \, * , &
+	\partial^{*} = - * \, \bar{\partial} \, * .
+\end{align*}
+на $(p,q)$ формах
+и собираемся исследовать их свойства. 
+	
+Более общо, если $E\to X$ --- голоморное расслоение, то их можно определить как $\bar \partial  = - *\partial_{\nabla^*}$, где $\partial_\nabla = \partial +A$, $A = H^{-1} \partial H$
+и
+\[\Delta_{\bar{\partial}} = \bar{\partial} \bar{\partial}^{*} + \bar{\partial}^{*} \bar{\partial}
+\]
+А также формально сопраженный оператор к $\bar \partial$:
+\begin{equation}\label{conjbar}
+	\int \langle \bar{\partial} \varphi, \psi \rangle \, \frac{\omega^n}{n!}
+= \int \langle \varphi, \bar{\partial}^{*} \psi \rangle \, \frac{\omega^n}{n!},
+\end{equation}
+где $\varphi\in\Gamma(\Lambda_X^{p,q-1})$, а $\psi \in \Gamma(\Lambda^{p,q})$
+
+Зачем нам вообще нужен этот оператор? Чуть раньше мы доказали \hyperref[subsec:dolbeault]{теорему Дольбо}, что когомологии голоморфного расслоения $E$ совпадают с когомологиями относительно оператора $\bar\partial$. Введённый нам выше оператор поможет сформулировать и доказать теорему Ходжа, которая утверждает, что для любого $\varphi \in \Gamma(E \otimes \Lambda^{0,0}_X)
+$ такого что $\bar \partial \varphi$ существует единственный $\psi$, такое что $[\psi] = [\varphi]$,  и $\Delta_{\bar{\partial}} \psi = 0$.
+
+Для оператора $\Delta_{d} = d d^{*} + d^{*} d, 
+$ где $ 
+d^{*} = - * d * .
+$ существует похожая теорема, которая тоже иногда носит имя Ходжа. Согласно ней для любого $\varphi$ существует причем единственный $\psi \in \Gamma (\Lambda_X^k)$, такой что $[\varphi]=[\psi]$ и $\Delta_d \psi$.
+
+\begin{definition}
+	Формы $\psi$, такие что $\Delta_{\bar \partial}$ (аналогично $\Delta_d\psi = 0$) называются \term[гармонические формы]{гармоническими}.	
+\end{definition}
+
+Напомним, что на формах есть скалярное произведение \[(\varphi,\psi) = \int \langle \varphi, \psi \rangle \frac{\omega^n}{n!} = \int \varphi\wedge\overline\psi.\]
+заметим, что оператор $\Delta_{\bar \partial} \colon \Gamma (\Lambda_X^{p,q}) \to \Gamma (\Lambda_X^{p,q})$ не повышает и не понижаает степени форм. В терминах вышеупомянутого скалярного произведения мы можем переписать формул \eqref{conjbar} как 
+\[(\bar\varphi,\psi) = (\varphi,\bar\partial ^*\psi).\]
+
+
+\begin{proposition}
+	Пусть $\psi$ гармонична, т.е $\Delta_{\bar\partial}\psi = 0$. Если $\psi = \bar\partial \alpha$, то $\psi =0$ (аналогично верно для $\Delta_d$)
+\end{proposition}
+\begin{proof}
+	Заметим, что если $\Delta_{\bar\partial}\psi =0$, тогда
+	 
+	\begin{multline}0=(\Delta_{\bar{\partial}} \psi, \psi)
+	= ((\bar{\partial} \bar{\partial}^{*} + \bar{\partial}^{*} \bar{\partial}) \psi, \psi) = (\bar{\partial} \bar{\partial}^{*} \psi, \psi)
+	+ (\bar{\partial}^{*} \bar{\partial} \psi, \psi) \\
+	=(\bar{\partial} \psi, \bar{\partial} \psi)
+	+ (\bar{\partial}^{*} \psi, \bar{\partial}^{*} \psi)
+	\end{multline}
+	
+т.к. оба последних слааемых положительны, то $\bar{\partial} \psi = 0$  
+и $\bar{\partial}^{*} \psi = 0$. Если $\psi = \bar\partial \alpha$, то
+\[0 \leq (\psi, \psi) = (\psi, \bar{\partial} \phi)
+= (\bar{\partial}^{*} \psi, \phi) = 0, \]
+откуда $(\psi, \psi) = 0$ и соответственно $\psi = 0.$
+\end{proof}
+Тоже самое верно и для $\psi \in \Gamma(E \otimes \Lambda^{p,q}_X)
+$, где $E\to X$ голоморфное расслоение.
+
+\begin{proposition}
+Пусть $(X,~ \omega)$ --- кэллерово, 	$E\to X$ голоморфное расслоение, $\varphi \in \Gamma(E\otimes\Lambda^{0,q})$. Тогда $\bar\partial = \operatorname{Alt}(\bar\nabla \psi)$, где $\nabla$ --- связность на $E\otimes \Lambda^{0,q}$.
+
+Или если
+\[\psi = \frac{1}{q!}\psi_{\bar k} d\bar z^ k = \sum_{k_1,\dots,k_q}\psi_{\bar k_1<\dots <\bar k_q}d \overline z^{k_1}\wedge \dots \wedge d\overline z^{k_q},\]
+то 
+\[\bar{\partial} \psi 
+=  \sum_{j=0}^{q} \sum_{k_0,\dots k_q}
+\nabla_{\bar{k}_j} \psi_{\bar{k}_0 \ldots \widehat{\bar{k}_j} \ldots \bar{k}_q}
+\, d\bar{z}^{k_j} \wedge d\bar{z}^{k_0} \wedge \cdots \wedge d\bar{z}^{k_q}
+\]
+\end{proposition}
+\begin{proof}
+Это следкет из того, что левая и правая части совпадают в нормальных координатах.	
+\end{proof}
+
+
+\begin{corollary}
+	\[\bar\partial^* \varphi= - \nabla^{\bar k} \varphi_{\bar k, \bar k_1,\dots,\bar k_{q-1}} d\bar z^{k_1} \wedge \dots \wedge d\bar z^{k_{q-1}}\]
+\end{corollary}
+Из явного вида компонент
+\[(\bar{\partial} \psi)_{\bar{k}_0 \ldots \bar{k}_q}
+= \nabla_{\bar{k}_0} \psi_{\bar{k}_1 \ldots \bar{k}_q}
+- \nabla_{\bar{k}_1} \psi_{\bar{k}_0 \bar{k}_2 \ldots \bar{k}_q}
++ \cdots
++ (-1)^q \nabla_{\bar{k}_q} \psi_{\bar{k}_0 \ldots \bar{k}_{q-1}}
+,\]
+а также следствия можно прямым вычислением показать, что 
+\begin{proposition}
+	Верно следующее равенство:
+\[(\Delta_{\bar{\partial}} \psi)_{\bar{k}_1 \ldots \bar{k}_q}
+= - \nabla^{\bar{k}} \nabla_{\bar{k}} \psi_{\bar{k}_1 \ldots \bar{k}_q}
++ [\nabla^{\bar{k}}, \nabla_{\bar{k}_1}] 
+\psi_{\bar{k} \bar{k}_2 \ldots \bar{k}_q}
++ \cdots
++ [\nabla^{\bar{k}}, \nabla_{\bar{k}_q}]
+\psi_{\bar{k}_1 \ldots \bar{k}_{q-1} \bar{k}}
+\]
+	
+\end{proposition}
+Таким образом можно сказать, что $\Delta_{\bar\partial} = \bar\nabla^*\bar\nabla +R_1$, где $R_1$ --- кусок, который завистт от кривизны, а $\bar\nabla^*\bar\nabla=-\nabla^{\bar k}\nabla_{\bar k}= - g^{j \bar{k}} \nabla_{j} \nabla_{\bar{k}}
+$.
+
+
+\begin{theorem}
+	Существует константа $C >0$, $C=C(X,\omega,H,E)$, такая что 
+	\[C((I + \Delta_{\bar{\partial}}) \psi, \psi)
+	\geq 
+	\int_X |\nabla \psi|^2 \, \frac{\omega^n}{n!}
+	+ \int_X |\bar{\nabla} \psi|^2 \, \frac{\omega^n}{n!}
+	+ \int_X |\psi|^2 \, \frac{\omega^n}{n!}
+	\]
+\end{theorem}
+\begin{proof}
+	Напомним, что, если подставить замечание выше в скалярное произвдение и проинтегировать по частям, то
+\[(\bar{\nabla} \nabla \psi, \psi)
+= (\bar{\nabla} \psi, \nabla \psi)
+= \int_X |\nabla \psi|^2 \, \frac{\omega^n}{n!}.
+\]
+Аналогично и для $\nabla^*\nabla$ получаем, что $\nabla^{*} \nabla = -\nabla^{j} \nabla_{j}
+= - g^{j \bar{k}} \nabla_{\bar{k}} \nabla_{j}
+$. Также 
+\[\nabla^{*} \nabla 
+= \frac{1}{2} (\bar{\nabla}^{*} \bar{\nabla} + \bar{\nabla} \bar{\nabla}^{*}) + R_2,
+\]
+где $R_2$ зависит от кривизны. Таким образом они зависят только от $X,E,\omega,H$.
+
+\end{proof}
+
+\subsection{Пространства Соболева}
+Пусть $E \to X$ --- гладкое расслоение с метрикой $H$, а $\nabla$ --- связность, сохраняющая метрику, $X$ ---компактное, ориентируемое и римваново с метрикой $g$. 
+
+Пусть $k \in \mathbb N$.
+
+\begin{definition}
+Пусть $s \in \Gamma(E)$, то 
+\[
+\| s \|_{k} \colon = 
+\left( 
+\sum_{m=0}^{k} 
+\int_{X} 
+|\nabla^{m} s|^{2} \, d\mu_{g}
+\right)^{1/2},
+\]
+где $|\nabla^{m} S|^{2}
+= H_{\alpha \bar{\beta}} \,
+g^{a_{1} b_{1}} \cdots g^{a_{m} b_{m}} \,
+\nabla_{a_{1}} \cdots \nabla_{a_{m}} S^{\alpha} \,
+\nabla_{b_{1}} \cdots \nabla_{b_{m}} s^{\beta}$
+называется \term[$k$-ая  Соебелевской нормой]{$k$-ая  Соебелевская норма}
+\end{definition}
+
+\begin{definition}
+	$H_k$ --- пополнение $\Gamma(E)$ по норме $\|\cdot\|_k$. Оно называется \term[пространство Соболева]{Пространством Соболева} и является Гильбертовым пространтсвом.
+\end{definition}
+
+\begin{theorem}\label{th:sobolev}
+	Пусть $\dim_{\mathbb{R}} X = n$. Тогда:
+	
+	\begin{enumerate}
+		\item Для любого $s \in \Gamma(E)$ выполнено
+		\[
+		\| s \|_{C^{k}(X)} \leq C \, \| s \|_{k+m},
+		\]
+		$m>n/2$ где $C$ --- константа, не зависящая от $s$.
+		
+		\item $C^{k}(X, E) \supset H_{k+s}$.
+		\item $\bigcap_{k=0}^{\infty} H_{k}(E) = \Gamma(E)$.
+		\item \hypertarget{lem:Rellich}{(Лемма Релиха)} Если $k<m$, тогда естественное вложение $H_m \subset H_k$ компактно. Т.е. если $\{\psi_j\} \in H_m$ и $|\psi_j| \leq C$, то $\exists$ подпоследовательность ${\psi_{j_k}}$, сходящаяся в $H_{k}$.
+	\end{enumerate}
+\end{theorem}
+
+\begin{remark}
+Если $E$ --- голоморфное расслоение над кэлеровым многообразием $(X,~ \omega)$, то $s \in \Gamma(E)$, норму
+\[
+\|s\|_k = 
+\left(
+\sum_{m=0}^{k} 
+\int_X 
+|\nabla^m s|^2 
+\frac{\omega^n}{n!}
+\right)^{1/2},
+\]
+Рассмотрим $\nabla^ms$ --- она может содержать части как $(0,1)$ так и части $(1,0)$ связности, потому определение нормы разумно переписывается как
+\[\left(
+\sum_{m=0}^{k}
+\sum_{q+s=m}
+\int_X 
+\big| \nabla_{a_1} \bar{\nabla}_{a_2} \nabla_{a_3}\dots \bar{\nabla}_{a_m} s \big|^2
+\frac{\omega^n}{n!}
+\right)^{1/2}.
+\]
+
+Например
+\[\|s\|_1 =
+\left(
+\int_X |\bar{\nabla} s|^2 \frac{\omega^n}{n!}
++ \int_X |\nabla s|^2 \frac{\omega^n}{n!}
++ \int_X |s|^2 \frac{\omega^n}{n!}
+\right)^{1/2}
+\]
+\end{remark}
+Ну и последний факт в который придется поверить это априорная оценка:
+\[\|s\|_{k+2} \leq C \left( \|\Delta s\|_k^2 + \|s\|_{k+1}^2 \right).
+\]
+Нетрудно видеть, что $\|\Delta s\|_o^2 \leq C\|s\|_2$.
+
+
+
+\newpage
+\section{Лекция 17}
+Мы продолим подбираться к теореме ходжа и даже по модулю некоторых свойств пространств Соболева приведем доказателльство.
+
+Пусть $(X,~ \omega)$ --компактное кэллерово многообразие, $E\to X$ --- голомор	фное векторное расслоение. На $E$ есть эрмитова метрика, $H = (H_{\alpha \bar\beta})$.
+На $\Gamma(X, E \otimes \Lambda^{p,q}_X)
+$ можно определить $\Delta_{\bar \partial}= \bar{\partial}^{*}\bar{\partial} + \bar{\partial}\bar{\partial}^{*}
+$. На прошлой лекции мытопределили Соболевские нормы, каоторые получаются из асскалярного произведения 
+\[(\varphi, \psi)_k = \sum_{m=0}^{k} \int_X \langle \nabla^m \varphi, \nabla^m \psi \rangle \frac{\omega^n}{n!}.
+\] 
+
+
+\begin{proposition}
+	Существует $C > 0$ такое, что
+	\[
+	\|\Delta \varphi\|_k \leq C \|\varphi\|_{k+2},
+	\]
+	где $\Delta = \Delta_{\bar{\partial}} $.
+\end{proposition}
+второго утверждения мы слегка каснулись на прошлой лекции
+\begin{proposition}
+	Пусть $\Delta$ --- лапласиан. Тогда существует $C > 0$ такое, что для любого $\varphi$ выполняется
+	\[
+	\|\varphi\|_{k+2}^2 \leq C \bigl( \|\Delta \varphi\|_k^2 + \|\varphi\|_k^2 \bigr).
+	\]
+	
+\textbf{Существует уточнённая версия неравенства}: если $\Delta \psi = f$, где $f \in H_k$, то 
+$\varphi\in H_{k+2}$ то верно следующее неравенство:
+\begin{equation}\label{strongineq}
+\|\varphi\|_{k+2} \leq C \left( \|\Delta \varphi\|_k + \|\varphi\|_{k+1} \right)
+= C \left( \|f\|_k + \|\varphi\|_{k+1} \right).
+\end{equation}
+\end{proposition}
+
+\begin{proposition}[Лемма Вейля] \label{prop:VeylL}
+	Пусть $\psi$ такова, что $
+	\Delta \varphi = \psi$ в слабом смысле, т.е.
+$
+	\forall \eta \in \Gamma(X, E \otimes \Lambda^{p,q}_X) \subset L^2$ выполняется 
+	$(\varphi, \Delta \eta)_{L^2} = (\psi, \eta)_{L^2}.$
+	Если $\psi \in \Gamma(X, E \otimes \Lambda^{p,q}_X)$, то $
+	\varphi \in \Gamma(X, E \otimes \Lambda^{p,q}_X).$
+\end{proposition}
+Приняв три утверждения выше на веру, а также вспомнив следующую теорему Гильберта:
+\begin{theorem}[Гильберт]\label{th:hilbert}
+Если $G$ --- компактный самосопряжённый неотрицательный оператор $G \colon H_0 \to H_0$
+\begin{enumerate}
+\item Тогда $H_0$ допускает базис из собственных векторов $G$. 
+\item Собственные значения $G$ --- вещественные, ограниченные,  
+и единственная  точка накопления собственных чисел оператора $G$ это ноль.  	
+\item Собственные пространства конечномерны.
+\item Собственные векторы образуют базис в $H_0$, который можно выбрать ортонормированным.
+\end{enumerate}
+\end{theorem}
+
+мы приступаем к доказательству главной теоремы:
+\begin{theorem}[Ходжа, Кодаира]\label{th:hodge}
+Пусть $(X,~ \omega)$ --- компактное кэллерово, $E \to X$ --- голоморное расслоение. $H_0$ --- пополнение $\Gamma (X, E\otimes \Lambda^{p,q}_X)$ по норме $\|\cdot\|_0$ (Можно неформально думать об $H_0$ как об $L^2(X,E\otimes \Lambda_X^{p,q})$ сечении), тогда 
+
+\begin{enumerate}
+\item[a)] Существует ортонормированный базис $\{\varphi_j\}$ из собственных сечений $\Delta$, т.е.
+$\Delta \varphi_j = \lambda_j \varphi_j,$ 
+где $\varphi_j \in \Gamma(X, E \otimes \Lambda^{p,q}_X)$, а собственные пространства с собственными пространства с собственными числами $\lambda_j$ конечномерны.
+
+
+\item[b)] Существует оператор $G \colon H_0 \to H_0$, такой что $\Delta G = \operatorname{Id}-\mathcal H = G\Delta$, где $\mathcal H$ --- проекция на $\ker \Delta$. Более того
+\begin{align*}
+& \bar\partial G = G \bar \partial, & \bar \partial ^* G = G \bar \partial ^*
+\end{align*}
+Оператор $G$ компактен (т.е. отображает последовательности в последовательности имеющие сходящиеся поподследовательности) и $G = \Delta^{-1}$ на $(\ker \Delta)^{\perp}$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+\textbf{Шаг 1.} Регулярность. Пусть положим $\ker \Delta' = \{\, \varphi \in H_2 \mid \Delta \varphi = 0 \,\}.$ Тогда если  $\varphi \in \ker \Delta$, то 
+$\varphi \in \Gamma(X, E \otimes \Lambda^{p,q}_X)$
+= по \hyperref[prop:VeylL]{лемме Вейля}. Если $\Delta \varphi = \lambda \varphi$ и верно \eqref{strongineq}, то $\varphi \in H_k$ для любого $k\geq 0$ и, следовательно, применяя \hyperref[th:sobolev]{теорему Соболева}, получаем  \[\varphi \in \bigcap_{k \geq 0} H_k 
+= \Gamma(X, E \otimes \Lambda^{p,q}_X).\]		
+
+\textbf{Шаг 2.} Конечномерность собственных пространств. 
+
+Предположим обратное, пусть $\ker \Delta$ бесконечномерное, пусть $\varphi_1,\varphi_2 \dots$ --- какой-то счетный ортонормированный по $\|\varphi_i\|_2$ базис (т.к. ядро лежит в $L^2$, то он существует), что $\varphi_i\perp \varphi_j$ и
+\[\sqrt{2}= \|\varphi_i-\varphi_j\|_2 \leq C \|\varphi_j - \varphi_{m,l}\|_1
+  \to 0.\]
+по \hyperref[lem:Rellich]{лемме Релиха} базис по норме содержит сходящуюся в $H_1$ подпоследовательность.
+
+\textbf{Шаг 3.} Пусть 
+\[R(\Delta) = \{ \varphi \in H_0 \mid \varphi = \Delta \psi,\ \psi \in H_2 \}
+\]
+\begin{proposition}
+$R(\Delta)$ замкнуто в $H_0$.
+\end{proposition}
+\begin{proof}[Доказательство предложения]
+	Покажем, что 
+	\[
+	\|\varphi\|_2 \leq C \|\Delta \psi\|
+	\]
+	если $\varphi \perp \ker \Delta$, $\varphi \in H_2$. От противного, пусть  существует $ \varphi_j \in H_2$, $\varphi_j \perp \ker \Delta$
+	и $\|\varphi_j\|_2 \geq j \|\Delta \varphi_j\|_0$.
+	Тогда $\psi_j = \dfrac{\varphi_j}{\|\varphi_j\|_2}$, т.е. $\|\psi_j\|_2 = 1$,
+	и $\|\Delta \psi_j\|_0 \leq \dfrac{1}{j}$.  Заметим, что $\psi_j$ сходятся в $H_1$, таким образом
+	\[
+	\|\psi_j - \psi_k\|_2 \leq C \left( \|\Delta \psi_j - \Delta \psi_k\|_0 + \|\psi_j - \psi_k\|_1 \right)
+	\]
+по неравенству треугольника получаем, что $\{\psi_j\}$---последовательность Коши в $H_2$, следовательно $\psi_j \to \psi$ и $\Delta \psi =0$. Но $\psi$ должно быть ортогонально $\ker\Delta$, а значит $\psi =0$, что противоречит $\|\psi\|=1$.
+
+
+Пусть теперь $\varPhi_j = \Delta \varphi_j$, $\varPhi_j \in H_2$ и $\varphi_j$ сходится.  
+Тогда  по только что доказанному неравенству
+\[
+\|\varphi _j - \varphi _k\|_2 \leq C \|\varPhi_j - \varPhi_k\|_0.
+\]
+Получаем, что $\varphi$ сходится и $\varphi = \lim \varphi_j$ и $\varPhi= \lim \varPhi_j = \Delta\varphi$.
+\end{proof}
+
+\textbf{Шаг 4.} Мы получили разложение  $H_0 = R(\Delta)\oplus R(\Delta)^\perp$. Заметим, что по \hyperref[prop:VeylL]{лемме Вейля} элементы $R(\Delta)$ лежат в $\ker \Delta$. Действительно, ортогональное дополнение к образу лежит в ядре, а с другой стороны, если взять произвольное гладкое сечение и его образ при лапласиане и спарить с элементом из ортогонального дополнения, то получим условие в слабом смысле, т.е. условие леммы Вейля.
+ Значит $R(\Delta)^\perp = \ker \Delta$.
+ 
+ \textbf{Шаг 5.}
+ т.к. $H_0 = R(\Delta) \oplus \ker \Delta$, $\varphi \in H_0,$ тогда  $\varphi = \Delta \psi + \varphi_0,$ где $\varphi_0 \in \ker \Delta,$ $\psi \perp \ker \Delta$ в $H_2$. Положим 
+ $G(\varphi - \varphi_0) = \psi,$ $G \colon R(\Delta) \to H_2.$ Т.е.
+ \[G \colon R(\Delta) \to H_2 \hookrightarrow H_0
+ \]
+ \begin{proposition}
+ 	 $G \colon H_0 \to H_0$. Тогда $G$ --- это компактный оператор. Более того, $G$ самосопряжен ограничен и $(G\varphi,\varphi)\geq 0$.
+ \end{proposition}
+ \begin{proof}[Доказательство предложения]
+Нетривиально здесь только самосопряженность, потому докажем только ее. Пусть $\varphi_1$, $\varphi_2 \in H_0$, $\varphi_i = \Delta \psi_i + \varphi_{0i}, $ $i = 1, 2,$, а $\psi_i \perp \ker \Delta,$  $\varphi_{0i} \in \ker \Delta.$ . Таким образом
+\[(G \varphi_1, \varphi_2) = (\psi_1, \varphi_2) = (\psi_1,\Delta\psi_2),\]
+и
+\[(\varphi_1, G \varphi_2) = (\varphi_1, \psi_2) = (\Delta\psi_1,\psi_2).\]
+Компактность следует из вложения, а ограниченность из оценки
+\[
+\|\psi_1 - \psi_2\|_2 \leq 
+C \, \|\Delta(\psi_1 - \psi_2)\|_0 \leq 
+C \, \|\varphi_1 - \varphi_2\|_0.
+\]
+\end{proof}
+И ссылаясь на \hyperref[th:hilbert]{теорему Гильберта} получаем прочие свойства и по построению $\Delta G = G\Delta = \operatorname{Id}-\mathcal H$.
+
+\textbf{Шаг 6.} В завершение доказательства осталось показать, что $\bar{\partial} G = G \bar{\partial}$, с одной стороны
+\[
+\bar{\partial} G \Delta \psi = \bar{\partial} \Delta G \psi =
+\Delta \bar{\partial} G \psi.\]
+С другой 
+\[
+\bar\partial \psi G \bar{\partial} \psi = G \Delta \bar{\partial} \psi =
+\Delta G \bar{\partial} \psi = (\mathrm{Id} - H) \bar{\partial} \psi = \bar\partial \psi.
+\]
+ В силу самосопряженности $G$ следует и второе утверждение.
+\end{proof} 
+
+
+\begin{corollary}
+\begin{multline*}
+\Gamma(X, E \otimes \Lambda^{p,q}) =
+\ker \Delta_{\bar{\partial}} \oplus 
+\Delta_{\bar{\partial}} \bigl(\Gamma(X, E \otimes \Lambda^{p,q})\bigr)\\
+= \ker \Delta_{\bar{\partial}} \oplus 
+\bar{\partial}(\bar{\partial}^* \Gamma) \oplus 
+\bar{\partial}^*(\bar{\partial} \Gamma)= \ker \Delta_{\bar{\partial}} \oplus 
+\Delta_{\bar{\partial}} \bigl(\Gamma(\Gamma)\bigr).
+\end{multline*}
+\end{corollary}
+
+
+\newpage
+\section{Лекция 18}
+На прошлой лекции мы доказали один из важнейших результатов курса, а именно \hyperref[th:hodge]{теорему Ходжа}. Теперь обсудим некоторые её следствия.
+
+
+\begin{corollary}
+	$H^q(X, E)$ и $H^{p,q}(X)$ конечномерны.
+\end{corollary}
+Формально мы это не доказывали, но приведенное выше доказзательство дословно работает и для когомологий Де Рама, таким образом следствие из нее будет следеющее.
+
+\begin{corollary}
+	Если $(X,~ g)$ --- компактное риманово многообразие,  
+	то $H^k_{\mathrm{dR}}(X, \mathbb{R})$ конечномерные. Более того звездочка Ходжа переводит гармонически формы в гармонически ($*\Delta_d=\Delta_d*$), следовательно $H^k(X,\mathbb{R})  \simeq H^{\dim_{\mathbb{R}}X -k}(X,\mathbb{R})$.
+\end{corollary}
+
+
+
+ Взглянем на композицию звездочки Ходжа и комплексного сопряжения. 
+По определению звездочка Ходжа это отображение 
+\[* : \Lambda_X^{p,q}(E) \longrightarrow \Lambda_X^{n-q, n-p}(E^*)
+\]
+ Тогда композияция $\overline *$ будет переводить в $\Lambda_x^{n-q,n-p}(E^*)$, $n=\dim_\mathbb{C} X$.Пусть $\mathcal H^q(x.E)$ --- гармонические $(0,q)$ формы в $E$, тогда $\overline *$ переводит гармонические формы со значениями в $E$ 
+ в гармонические формы со значениями в $E^*$. 
+ Поэтому $\overline * : \mathcal{H}^q(E) \to \mathcal{H}^{n-q}(K_X \otimes E^*)$ и это изоморфизм ($\mathbb{C}$ --- антилинейный). Таким образом 
+ 
+ 
+ \begin{corollary}
+Имеет место двойственность Серра: $H^q(X, E) \simeq H^{n-q}(X, K_X \otimes E^*)^*$,  и  $H^{p,q}(X) \simeq H^{n-p, n-q}(X)^*$.
+ 	
+ \end{corollary}
+ 
+ 
+\begin{proposition}
+ 	Пусть $(X,~ g)$ --- компактное ориентируемое риманово многообразие и $f \in C^\infty(X)$ такое, что
+ 	\[
+ 	\int_X f\, dV = 0.
+ 	\]
+ 	Тогда существует $\varphi \in C^\infty(X)$, такое что
+ 	\[
+ 	\Delta \varphi = f \quad \text{и} \quad \int_X \varphi\, dV = 0.
+ 	\]
+ \end{proposition}
+ \begin{proof}
+ 	По \hyperref[th:hodge]{теореме Ходжа} имеем:
+ 	\begin{equation}\label{eq:18.4}
+ 	C^\infty(X) = \mathbb{R} \oplus \Delta(C^\infty(X)).
+ 	\end{equation}
+ 	Если $\int_X f\, dV = 0$, то $f$ лежит в образе $\Delta$.
+ 	Если $f \in C^\infty(X)$ --- произвольная функция, то её проекция на $\mathbb{R}$ в \eqref{eq:18.4} равна
+ 	\[
+ 	\frac{\int_X f\, dV}{\int_X dV}.
+ 	\]
+ 	
+ \end{proof}
+ 
+ \begin{corollary}[Неравенство Пуанкаре]
+ 	Пусть $(X,~ g)$ --- компактное ориентируемое риманово многообразие.  
+ 	Если $f \in C^\infty(X)$ --- произвольная функция, то
+ 	\[
+ 	\bar{f} = \frac{\int_X f\, dV}{V}, \qquad V = \int_X dV,
+ 	\]
+ 	где $dV$ --- форма объёма.
+ 	
+ 	Тогда существует $\lambda_1 = \lambda_1(X,~ g) > 0$, такое что
+ 	\[
+ 	\int_X |\nabla f|^2\, dV \geq \lambda_1 \int_X |f - \bar{f}|^2\, dV.
+ 	\]
+ \end{corollary}
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
+\printindex[terms] 
+
+
+\end{document}
+
+
+
+
