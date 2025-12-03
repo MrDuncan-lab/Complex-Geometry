@@ -1,0 +1,14 @@
+*.aux
+*.log
+*.synctex.gz
+*.out
+*.toc
+*.bbl
+*.blg
+*.idx
+*.ilg
+*.ind
+*.nlo
+*.lof
+*.lot
+*_minted*

@@ -52,8 +52,6 @@ labelfont=bf,labelsep=period,
 justification=centering
 ]{caption}
 
-% --- Код с подсветкой (нужно -shell-escape) ---
-\usepackage{minted}
 
 % --- Теоремы и задачи ---
 \newcounter{problem}[section]
@@ -65,21 +63,8 @@ justification=centering
 \theoremstyle{definition}\newtheorem{definition}[theorem]{Определение}
 \newtheorem{example}[theorem]{Пример}
 \theoremstyle{remark}\newtheorem*{remark}{Замечание}
+\theoremstyle{remark}\newtheorem*{problem}{Задача}
 \newcommand{\norm}[1]{\left\lVert #1\right\rVert}
-
-% Задачи в рамке
-\usepackage[most]{tcolorbox}
-\newtcolorbox{problem}[1][]{%
-	enhanced, breakable,
-	colback=cyan!2, colframe=white, sharp corners, boxrule=0.2pt,
-	title={\bfseries Задача \theproblem.}, coltitle=black, fonttitle=\bfseries,
-	attach boxed title to top left={xshift=2mm,yshift=-1mm},
-	boxed title style={colframe=white, colback=cyan!2, top=1pt, bottom=1pt, left=2pt, right=2pt},
-	borderline west={2pt}{0pt}{red!75!black},
-	before skip=10pt, after skip=10pt,
-	before upper={\refstepcounter{problem}\addcontentsline{toc}{subsection}{Задача \theproblem}},
-	#1
-}
 \newenvironment{solution}{\par\noindent\textit{Решение.}\ }{\hfill$\blacksquare$\par\vspace{1em}}
 \renewcommand{\qedsymbol}{$\blacksquare$}
 
@@ -1919,10 +1904,12 @@ H^{p}(X,\mathcal F)\to H^{p}(X,\mathcal G)\to H^{p}(X,\mathcal H)\xrightarrow{\d
 \]
 \end{proof}
 
-\subsection{Теорема Дольбо}\label{subsec:dolbeault}
-Теперь $X$ --- комплексное многообразие, $E\to X$ --- голоморное векторное расслоение, а $\mathcal A ^{q}(E)$ --- $(0,q)$ формы в $E$. Рассмотрим точную последовательность 
-\[0 \to \mathcal{O}(E) \to A^{0}(E) \xrightarrow{\overline{\partial}} A^{1}(E) \xrightarrow{\overline{\partial}} A^{2}(E) \to \cdots\]
-Она точная по \hyperref[th:dbar-poincare]{лемме Пуанкаре}
+\subsection{Теорема Дольбо}\label{subsec:dolbeault}	
+Теперь $X$ --- комплексное многообразие, $E\to X$ --- голоморфное векторное расслоение, а $\mathcal A^{q}(E)$ --- пучок $(0,q)$-форм со значениями в $E$. Рассмотрим комплекс пучков
+\[
+0 \to \mathcal{O}(E) \to A^{0}(E) \xrightarrow{\overline{\partial}} A^{1}(E) \xrightarrow{\overline{\partial}} A^{2}(E) \to \cdots
+\]
+По \hyperref[th:dbar-poincare]{лемме Пуанкаре} этот комплекс является точной последовательностью, то есть для каждого $q\ge1$ имеем короткие точные последовательности пучков
 \[
 0 \to \mathcal{O}(E) \hookrightarrow A^{0}(E) \xrightarrow{\bar\partial} \bar\partial A^{0}(E) \to 0,
 \]
@@ -1930,12 +1917,11 @@ H^{p}(X,\mathcal F)\to H^{p}(X,\mathcal G)\to H^{p}(X,\mathcal H)\xrightarrow{\d
 0 \to \bar\partial A^{q-1}(E) \hookrightarrow A^{q}(E) \xrightarrow{\bar\partial} \bar\partial A^{q}(E) \to 0 .
 \]
 
-
+Напомним общий факт: для любой короткой точной последовательности пучков
 \[
 0 \longrightarrow \mathcal F \longrightarrow \mathcal G \longrightarrow \mathcal H \longrightarrow 0
 \]
-
-% длинная точная последовательность когомологий
+существует ассоциированная длинная точная последовательность когомологий
 \begin{multline}
 0 \longrightarrow H^0(X,\mathcal F) \longrightarrow H^0(X,\mathcal G) \longrightarrow H^0(X,\mathcal H)
 \longrightarrow\\ H^1(X,\mathcal F) \longrightarrow H^1(X,\mathcal G) \longrightarrow H^1(X,\mathcal H)
@@ -1944,31 +1930,52 @@ H^{p}(X,\mathcal F)\to H^{p}(X,\mathcal G)\to H^{p}(X,\mathcal H)\xrightarrow{\d
 \xrightarrow{\delta} H^{q+1}(X,\mathcal F) \longrightarrow \cdots
 \end{multline}
 
-
-Также заметим что $H^q(X, \mathcal{F}^p(E)) = 0,$ $q \geq 1.$ и $H^q(X, \mathcal{O}(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)), \quad q \geq 2.$
-
-А также 
-\[0 \leftarrow H^1(X, \partial(E)) \leftarrow H^0(X, \overline{\partial} \mathcal{A}^0(E)) 
-\xleftarrow{\ \overline{\partial} \ } H^0(X, \mathcal{A}(E)) 
-\leftarrow H^0(X, \partial(E)) \leftarrow 0.\]
-
-\[H^1(X, \mathcal O(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^0(E))}{\overline{\partial} H^0(X, \mathcal{A}^0(E))}.
+Пучки $A^p(E)$ (а значит и $\mathcal A^p(E)$) являются тонкими, поэтому их высшие когомологии исчезают:
+\[
+H^q(X, \mathcal{F}^p(E)) = 0,\quad q \geq 1.
+\]
+Применяя длинную точную последовательность когомологий к короткой точной последовательности
+\[
+0 \to \mathcal{O}(E) \hookrightarrow A^{0}(E) \xrightarrow{\bar\partial} \bar\partial A^{0}(E) \to 0,
+\]
+ получаем для $q\ge2$ изоморфизмы
+\[
+H^q(X, \mathcal{O}(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)), \quad q \geq 2.
 \]
 
-а также комбинирую две точные последовательности получаем, что 
-\[H^q(X, \partial(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)) 
-\cong H^1(X, \overline{\partial} \mathcal{A}^{q-1}(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))}{\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))}
+Для малых значений $q$ из той же длинной точной последовательности имеем 
+\[
+0 \leftarrow H^1(X, \partial(E)) \leftarrow H^0(X, \overline{\partial} \mathcal{A}^0(E)) 
+\xleftarrow{\ \overline{\partial} \ } H^0(X, \mathcal{A}^0(E)) 
+\leftarrow H^0(X, \partial(E)) \leftarrow 0.
 \]
-где последнее это 
-\[H_{\overline{\partial}}^q(X, E) \cong 
+(Здесь $\partial(E)$ обозначает тот же пучок, что и $\mathcal O(E)$.) Отсюда немедленно следует
+\[
+H^1(X, \mathcal O(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^0(E))}{\overline{\partial} H^0(X, \mathcal{A}^0(E))}.
+\]
+
+Аналогично, применяя длинную точную последовательность к последовательностям
+\[
+0 \to \bar\partial A^{q-1}(E) \hookrightarrow A^{q}(E) \xrightarrow{\bar\partial} \bar\partial A^{q}(E) \to 0 ,
+\]
+и снова используя исчезновение когомологий тонких пучков, комбинируя полученные изоморфизмы с изложенным выше случаем, получаем, что для всех $q\ge1$
+\[
+H^q(X, \partial(E)) \cong H^{q-1}(X, \overline{\partial} \mathcal{A}^0(E)) 
+\cong H^1(X, \overline{\partial} \mathcal{A}^{q-1}(E)) \cong \frac{H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))}{\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))}.
+\]
+С другой стороны, по определению когомологий Дольбо
+\[
+H_{\overline{\partial}}^q(X, E) \cong 
 \frac{\ker\left(\overline{\partial} \colon \mathcal{A}^q(E) \to \mathcal{A}^{q+1}(E)\right)}
-{\operatorname{Im}\left(\overline{\partial} \colon \mathcal{A}^{q-1}(E) \to \mathcal{A}^q(E)\right)}
+{\operatorname{Im}\left(\overline{\partial} \colon \mathcal{A}^{q-1}(E) \to \mathcal{A}^q(E)\right)}.
 \]
-Так как $H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))$ --- это замкнутые $(0, q)$-формы со значениями в $E$, а 
-$\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))$ --- точные формы,
-
+Так как $H^0(X, \overline{\partial} \mathcal{A}^{q-1}(E))$ состоит из $\overline{\partial}$-замкнутых $(0,q)$-форм со значениями в $E$, а 
+$\overline{\partial} H^0(X, \mathcal{A}^{q-1}(E))$ — из $\overline{\partial}$-точных форм, получаем 
+\[
+H^q(X,\partial(E)) \cong H_{\overline{\partial}}^q(X,E).
+\]
 \begin{theorem}[Дальбо]
-Пусть $X$ --- комплексное многообразие, $E \to X$ --- голоморфное векторное расслоение. Тогда
+Пусть $X$ --- комплексное многообразие, $E \to X$ --- голоморфное векторное расслоение. Тогда 
 \[
 H^q(X, \partial(E)) \cong 
 \frac{
